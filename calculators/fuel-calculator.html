@@ -1,0 +1,531 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Fuel Calculator — Design Asylum</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#0A0A0B;
+    --panel:#141416;
+    --panel-2:#1B1B1F;
+    --border:#2C2C33;
+    --border-soft:#232328;
+    --accent:#FF6A1F;
+    --accent-soft:#FFB066;
+    --ink:#F7F7F9;
+    --muted:#B4B4BC;
+    --muted-2:#8C8C95;
+    --good:#5BD27C;
+    --bad:#FF6B6B;
+    --radius:16px;
+    --tap:44px;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);font-family:Inter,system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased;font-size:16px}
+  .wrap{max-width:1200px;margin:0 auto;padding:28px 20px 72px}
+
+  /* ---------- header ---------- */
+  header.top{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:24px;flex-wrap:wrap}
+  .brand{display:flex;align-items:center;gap:13px}
+  .dmark{width:36px;height:36px;border-radius:10px;background:var(--accent);display:grid;place-items:center;color:#0A0A0B;font-family:Anton,Inter,sans-serif;font-size:23px;line-height:1}
+  .brand small{display:block;color:var(--muted);font-size:12px;letter-spacing:.16em;text-transform:uppercase;margin-bottom:3px}
+  h1{font-family:Anton,Inter,sans-serif;font-weight:400;letter-spacing:.015em;font-size:31px;margin:0;text-transform:uppercase}
+  .tagline{color:var(--muted);font-size:14px;max-width:430px;line-height:1.55;margin:4px 0 0}
+  .resetbtn{background:var(--panel-2);border:1px solid var(--border);color:var(--muted);font:inherit;font-size:13px;font-weight:600;padding:9px 15px;border-radius:10px;cursor:pointer;min-height:var(--tap)}
+  .resetbtn:hover{color:var(--ink);border-color:var(--accent)}
+  .resetbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+  .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:20px;align-items:start}
+  @media(max-width:920px){.grid{grid-template-columns:1fr}}
+  .col-left{display:flex;flex-direction:column;gap:18px}
+
+  /* ---------- step cards ---------- */
+  .card{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:20px}
+  .step{display:flex;align-items:center;gap:11px;margin-bottom:18px}
+  .step .n{width:25px;height:25px;border-radius:50%;background:rgba(255,106,31,.14);color:var(--accent);font-size:13px;font-weight:700;display:grid;place-items:center;flex:0 0 auto}
+  .step h2{font-size:13px;letter-spacing:.05em;text-transform:uppercase;color:var(--ink);margin:0;font-weight:700}
+  .step p{margin:2px 0 0;font-size:12px;color:var(--muted-2)}
+  .step .head{display:flex;flex-direction:column}
+  .divide{height:1px;background:var(--border-soft);margin:20px 0}
+
+  /* industry radios */
+  .industries{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+  .ind{position:relative}
+  .ind input{position:absolute;opacity:0;inset:0;cursor:pointer}
+  .ind span{display:flex;align-items:center;gap:10px;border:1px solid var(--border);border-radius:11px;padding:0 13px;min-height:var(--tap);font-size:14px;font-weight:500;color:var(--muted);transition:.15s;cursor:pointer}
+  .ind span::before{content:"";width:16px;height:16px;border-radius:50%;border:2px solid var(--muted-2);flex:0 0 auto;transition:.15s}
+  .ind input:checked + span{border-color:var(--accent);color:var(--ink);background:rgba(255,106,31,.08)}
+  .ind input:checked + span::before{border-color:var(--accent);background:radial-gradient(circle at center,var(--accent) 0 5px,transparent 6px)}
+  .ind input:focus-visible + span{outline:2px solid var(--accent);outline-offset:2px}
+  .customrow{margin-top:10px}
+
+  /* fields */
+  .field{margin-top:20px}
+  .field:first-child{margin-top:0}
+  .lab{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:10px}
+  .lab .name{font-size:14px;font-weight:600;display:flex;align-items:center;gap:7px}
+  .lab .sub-note{font-weight:400;color:var(--muted-2);font-size:12.5px}
+  .lab .val{font-family:Anton,Inter,sans-serif;font-size:18px;color:var(--accent);font-weight:400}
+  .lab .val.ink{color:var(--ink)}
+  .range-foot{display:flex;justify-content:space-between;margin-top:8px;font-size:11.5px;color:var(--muted-2)}
+  .imp{font-size:12px;color:var(--muted-2);margin-top:7px}
+  .imp b{color:var(--accent-soft);font-weight:600}
+
+  /* info tooltip */
+  .info{width:16px;height:16px;border-radius:50%;border:1px solid var(--muted-2);color:var(--muted-2);font-size:11px;font-weight:700;display:inline-grid;place-items:center;cursor:help;position:relative}
+  .info:hover,.info:focus{color:var(--ink);border-color:var(--ink)}
+  .info[data-tip]:hover::after,.info[data-tip]:focus::after{content:attr(data-tip);position:absolute;left:50%;bottom:140%;transform:translateX(-50%);width:210px;background:#000;border:1px solid var(--border);color:var(--ink);font-size:11.5px;font-weight:400;line-height:1.45;padding:9px 11px;border-radius:9px;z-index:10;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+
+  /* sliders */
+  input[type=range]{-webkit-appearance:none;appearance:none;width:100%;height:var(--tap);background:transparent;cursor:pointer;margin:0}
+  input[type=range]::-webkit-slider-runnable-track{height:6px;border-radius:6px;background:var(--panel-2);border:1px solid var(--border-soft)}
+  input[type=range]::-moz-range-track{height:6px;border-radius:6px;background:var(--panel-2);border:1px solid var(--border-soft)}
+  input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;margin-top:-9px;border-radius:50%;background:var(--accent);border:4px solid #0A0A0B;box-shadow:0 0 0 1px var(--accent)}
+  input[type=range]::-moz-range-thumb{width:18px;height:18px;border-radius:50%;background:var(--accent);border:4px solid #0A0A0B;box-shadow:0 0 0 1px var(--accent)}
+  input[type=range]:focus-visible::-webkit-slider-thumb{outline:2px solid var(--ink);outline-offset:2px}
+
+  /* number inputs */
+  .num{display:flex;align-items:center;gap:9px;background:var(--panel-2);border:1px solid var(--border);border-radius:11px;padding:0 13px;min-height:var(--tap)}
+  .num .cur{color:var(--muted-2);font-size:14px}
+  .num input{flex:1;background:transparent;border:0;color:var(--ink);font-size:15px;font-weight:600;outline:none;width:100%;font-family:Inter,sans-serif}
+  .num:focus-within{border-color:var(--accent)}
+  .num input::-webkit-outer-spin-button,.num input::-webkit-inner-spin-button{-webkit-appearance:none;margin:0}
+  .num input[type=number]{-moz-appearance:textfield}
+  .num input::placeholder{color:var(--muted-2);font-weight:400}
+  .two{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:520px){.two{grid-template-columns:1fr}}
+
+  .toggle{display:flex;align-items:center;gap:11px;font-size:14px;color:var(--muted);cursor:pointer;user-select:none;min-height:var(--tap)}
+  .toggle input{width:18px;height:18px;accent-color:var(--accent)}
+
+  /* ---------- results ---------- */
+  .results{position:sticky;top:20px;display:flex;flex-direction:column;gap:14px}
+  @media(max-width:920px){.results{position:static}}
+
+  .hero{background:linear-gradient(155deg,#221710,#141416 58%);border:1px solid var(--border);border-radius:var(--radius);padding:24px;position:relative;overflow:hidden}
+  .hero::after{content:"";position:absolute;right:-70px;top:-70px;width:230px;height:230px;background:radial-gradient(circle,rgba(255,106,31,.24),transparent 70%);pointer-events:none}
+  .hero .k{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+  .hero .big{font-family:Anton,Inter,sans-serif;font-size:clamp(44px,8vw,58px);line-height:1;margin:9px 0 5px;letter-spacing:.01em}
+  .hero .sub{color:var(--muted);font-size:14px;line-height:1.5}
+  .hero .sub b{color:var(--ink);font-weight:600}
+
+  .bar{display:flex;height:14px;border-radius:8px;overflow:hidden;margin:20px 0 9px;background:var(--panel-2);border:1px solid var(--border-soft)}
+  .bar .seg{height:100%;transition:width .25s ease}
+  .bar .ads{background:var(--accent)}
+  .bar .inf{background:var(--accent-soft)}
+  .legend{display:flex;gap:20px;flex-wrap:wrap;font-size:12.5px;color:var(--muted)}
+  .legend i{display:inline-block;width:10px;height:10px;border-radius:3px;margin-right:7px;vertical-align:middle}
+
+  .cells{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+  @media(max-width:520px){.cells{grid-template-columns:1fr}}
+  .cell{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:15px}
+  .cell .t{font-size:11.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);display:flex;align-items:center;gap:7px}
+  .cell .t i{width:8px;height:8px;border-radius:50%}
+  .cell .m{font-family:Anton,Inter,sans-serif;font-size:25px;margin:8px 0 3px;letter-spacing:.01em}
+  .cell .d{font-size:12.5px;color:var(--muted)}
+  .cell .d b{color:var(--ink);font-weight:600}
+
+  .check{border-radius:12px;padding:14px 16px;font-size:13.5px;line-height:1.55;border:1px solid var(--border);background:var(--panel)}
+  .check .badge{display:inline-block;font-size:11px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;padding:3px 9px;border-radius:20px;margin-right:8px}
+  .check.ok{background:rgba(91,210,124,.08);border-color:rgba(91,210,124,.4)}
+  .check.ok .badge{background:var(--good);color:#06210f}
+  .check.no{background:rgba(255,107,107,.08);border-color:rgba(255,107,107,.4)}
+  .check.no .badge{background:var(--bad);color:#2a0808}
+  .check.idle{color:var(--muted)}
+  .check b{color:var(--ink)}
+
+  .totcard{background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px}
+  .totline{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:9px 0}
+  .totline + .totline{border-top:1px solid var(--border-soft)}
+  .totline.grand{border-top:1px dashed var(--border);margin-top:3px;padding-top:14px}
+  .totline .lbl{font-size:13.5px;color:var(--muted)}
+  .totline .lbl b{color:var(--ink)}
+  .totline .amt{font-family:Anton,Inter,sans-serif;font-size:21px}
+  .totline.grand .amt{color:var(--accent);font-size:26px}
+
+  /* tax control */
+  .taxrow{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:13px 0 4px;border-top:1px solid var(--border-soft);margin-top:3px}
+  .taxlbl{font-size:13px;color:var(--muted);font-weight:600;margin-right:2px}
+  .chips{display:flex;gap:8px;flex-wrap:wrap}
+  .chip{background:var(--panel-2);border:1px solid var(--border);color:var(--muted);font:inherit;font-size:12.5px;font-weight:600;padding:0 13px;min-height:38px;border-radius:9px;cursor:pointer}
+  .chip:hover{color:var(--ink);border-color:var(--accent)}
+  .chip.active{background:rgba(255,106,31,.14);border-color:var(--accent);color:var(--ink)}
+  .chip:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .taxcustom{min-height:38px;padding:0 10px;max-width:108px}
+  .taxcustom input{width:46px;text-align:right}
+  .gst{font-size:11.5px;color:var(--muted-2);margin-top:8px;text-align:right}
+
+  .foot{color:var(--muted);font-size:12px;line-height:1.65}
+  .foot b{color:var(--ink)}
+  .pill{display:inline-block;background:var(--panel-2);border:1px solid var(--border);border-radius:20px;padding:4px 11px;font-size:11.5px;color:var(--muted);margin-top:4px}
+  details{margin-top:11px}
+  summary{cursor:pointer;color:var(--muted);font-size:12.5px;min-height:28px;display:flex;align-items:center}
+  summary:hover{color:var(--ink)}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="top">
+    <div class="brand">
+      <div class="dmark">d</div>
+      <div>
+        <small>Design Asylum</small>
+        <h1>Fuel Calculator</h1>
+        <p class="tagline">Set a customer target and a timeline. See the media and influencer fuel it takes to get there.</p>
+      </div>
+    </div>
+    <button class="resetbtn" id="reset" type="button">Reset</button>
+  </header>
+
+  <div class="grid">
+    <!-- ================= INPUTS ================= -->
+    <div class="col-left">
+
+      <!-- step 1 -->
+      <section class="card">
+        <div class="step">
+          <span class="n">1</span>
+          <div class="head"><h2>Industry</h2><p>Loads typical benchmarks you can override</p></div>
+        </div>
+        <div class="industries" id="industries">
+          <label class="ind"><input type="radio" name="ind" value="skincare" checked><span>Skincare</span></label>
+          <label class="ind"><input type="radio" name="ind" value="edtech"><span>EdTech</span></label>
+          <label class="ind"><input type="radio" name="ind" value="fashion"><span>Fashion &amp; Apparel</span></label>
+          <label class="ind"><input type="radio" name="ind" value="food"><span>Food Products</span></label>
+          <label class="ind" style="grid-column:1 / -1"><input type="radio" name="ind" value="custom"><span>Custom industry</span></label>
+        </div>
+        <div class="customrow" id="customRow" style="display:none">
+          <div class="num"><input type="text" id="customName" placeholder="Name your industry (e.g. Pet care)" maxlength="40"></div>
+        </div>
+      </section>
+
+      <!-- step 2 -->
+      <section class="card">
+        <div class="step">
+          <span class="n">2</span>
+          <div class="head"><h2>Your target</h2><p>What you want, and by when</p></div>
+        </div>
+        <div class="field">
+          <div class="lab"><span class="name">Customers to acquire</span><span class="val" id="convVal">5,000</span></div>
+          <input type="range" id="conv" min="100" max="100000" step="100" value="5000" aria-label="Customers to acquire">
+          <div class="range-foot"><span>100</span><span>type an exact number below</span><span>100K</span></div>
+          <div class="num" style="margin-top:10px"><input type="number" id="convNum" value="5000" min="1" step="100" aria-label="Exact customer count"></div>
+        </div>
+        <div class="field">
+          <div class="lab"><span class="name">Timeline</span><span class="val" id="timeVal">5 months</span></div>
+          <input type="range" id="time" min="1" max="48" step="1" value="5" aria-label="Timeline in months">
+          <div class="range-foot"><span>1 month</span><span>48 months</span></div>
+        </div>
+      </section>
+
+      <!-- step 3 -->
+      <section class="card">
+        <div class="step">
+          <span class="n">3</span>
+          <div class="head"><h2>Unit economics</h2><p>What an order is worth and how efficiently each channel sells</p></div>
+        </div>
+        <div class="field">
+          <div class="lab"><span class="name">Average order value</span><span class="sub-note">per purchase</span></div>
+          <div class="num"><span class="cur">₹</span><input type="number" id="aov" value="700" min="1" step="50" aria-label="Average order value"></div>
+        </div>
+        <div class="two" style="margin-top:20px">
+          <div class="field" style="margin-top:0">
+            <div class="lab"><span class="name">Meta ROAS <span class="info" tabindex="0" data-tip="Return on ad spend: revenue earned per ₹1 of Meta budget. Higher means cheaper customers.">i</span></span><span class="val" id="roasMetaVal">2.2x</span></div>
+            <input type="range" id="roasMeta" min="0.1" max="5" step="0.1" value="2.2" aria-label="Meta ROAS">
+            <div class="imp">CAC <b id="impAds">₹318</b> per customer</div>
+          </div>
+          <div class="field" style="margin-top:0">
+            <div class="lab"><span class="name">Influencer ROAS <span class="info" tabindex="0" data-tip="Revenue per ₹1 paid to creators. Usually higher than ads, but it scales slower and carries fewer customers.">i</span></span><span class="val" id="roasInfVal">5.0x</span></div>
+            <input type="range" id="roasInf" min="0.1" max="5" step="0.1" value="5.0" aria-label="Influencer ROAS">
+            <div class="imp">CAC <b id="impInf">₹140</b> per customer</div>
+          </div>
+        </div>
+        <div class="field">
+          <div class="lab"><span class="name">Channel split</span><span class="val ink" id="splitVal">85% ads · 15% influencers</span></div>
+          <input type="range" id="split" min="0" max="100" step="5" value="85" aria-label="Share of customers from ads">
+          <div class="range-foot"><span>100% influencers</span><span>100% ads</span></div>
+        </div>
+      </section>
+
+      <!-- step 4 -->
+      <section class="card">
+        <div class="step">
+          <span class="n">4</span>
+          <div class="head"><h2>Reality check</h2><p>Optional. Test what you can actually spend</p></div>
+        </div>
+        <div class="field" style="margin-top:0">
+          <div class="lab"><span class="name">Budget you can spend per month</span><span class="sub-note">on ads</span></div>
+          <div class="num"><span class="cur">₹</span><input type="number" id="cap" value="0" min="0" step="10000" aria-label="Monthly ad budget"></div>
+          <div class="imp">We'll check if that hits the target in time. Leave at 0 to skip.</div>
+        </div>
+        <div class="divide"></div>
+        <label class="toggle"><input type="checkbox" id="agToggle"> Include our monthly retainer in the total</label>
+        <div class="field" id="agWrap" style="margin-top:12px;display:none">
+          <div class="lab"><span class="name">Agency retainer</span><span class="sub-note">per month</span></div>
+          <div class="num"><span class="cur">₹</span><input type="number" id="agency" value="225000" min="0" step="25000" aria-label="Agency retainer per month"></div>
+        </div>
+      </section>
+
+    </div>
+
+    <!-- ================= RESULTS ================= -->
+    <section class="results">
+      <div class="hero">
+        <div class="k" id="heroK">Total fuel required · Skincare</div>
+        <div class="big" id="fuelBig">₹0</div>
+        <div class="sub" id="fuelSub">Fuel goes to Meta and creators. Our fee is separate.</div>
+
+        <div class="bar"><div class="seg ads" id="segAds" style="width:85%"></div><div class="seg inf" id="segInf" style="width:15%"></div></div>
+        <div class="legend">
+          <span><i style="background:var(--accent)"></i><span id="legAds">Meta ads ₹0</span></span>
+          <span><i style="background:var(--accent-soft)"></i><span id="legInf">Influencers ₹0</span></span>
+        </div>
+      </div>
+
+      <div class="cells">
+        <div class="cell">
+          <div class="t"><i style="background:var(--accent)"></i>Meta ads</div>
+          <div class="m" id="adsTot">₹0</div>
+          <div class="d"><b id="adsMo">₹0</b>/mo · CAC <b id="adsCac">₹0</b></div>
+        </div>
+        <div class="cell">
+          <div class="t"><i style="background:var(--accent-soft)"></i>Influencers</div>
+          <div class="m" id="infTot">₹0</div>
+          <div class="d"><b id="infMo">₹0</b>/mo · CAC <b id="infCac">₹0</b></div>
+        </div>
+        <div class="cell">
+          <div class="t"><i style="background:#8C8C95"></i>Pace</div>
+          <div class="m" id="pace">0</div>
+          <div class="d">customers per month</div>
+        </div>
+        <div class="cell">
+          <div class="t"><i style="background:#8C8C95"></i>Revenue generated</div>
+          <div class="m" id="rev">₹0</div>
+          <div class="d">blended CAC <b id="blendCac">₹0</b></div>
+        </div>
+      </div>
+
+      <div class="check idle" id="check">Add a monthly budget in step 4 to test whether this is reachable in time.</div>
+
+      <div class="totcard">
+        <div class="totline"><span class="lbl">Growth fuel (media + influencers)</span><span class="amt" id="totFuel">₹0</span></div>
+        <div class="totline" id="agLine" style="display:none"><span class="lbl">Agency retainer <span id="agMonths" style="color:var(--muted-2)"></span></span><span class="amt" id="totAg">₹0</span></div>
+        <div class="totline"><span class="lbl">Subtotal</span><span class="amt" id="subAmt">₹0</span></div>
+
+        <div class="taxrow">
+          <span class="taxlbl">Add tax</span>
+          <div class="chips" id="taxChips">
+            <button type="button" class="chip active" data-rate="0">Off</button>
+            <button type="button" class="chip" data-rate="5">5%</button>
+            <button type="button" class="chip" data-rate="12">12%</button>
+            <button type="button" class="chip" data-rate="18">18%</button>
+            <button type="button" class="chip" data-rate="custom">Custom</button>
+          </div>
+          <div class="num taxcustom" id="taxCustomWrap" style="display:none"><input type="number" id="taxCustom" min="0" max="100" step="1" value="18" aria-label="Custom tax percentage"><span class="cur">%</span></div>
+        </div>
+
+        <div class="totline" id="taxLine" style="display:none"><span class="lbl" id="taxLbl">Tax</span><span class="amt" id="taxAmt">₹0</span></div>
+        <div class="totline grand"><span class="lbl"><b>Total payable</b></span><span class="amt" id="grand">₹0</span></div>
+        <div class="gst" id="taxNote">No tax added</div>
+      </div>
+
+      <div class="foot">
+        <b>How this works:</b> Customers are split by the channel slider. Spend per channel = customers × AOV ÷ ROAS. Fuel is paid to platforms and creators; the retainer is our fee, kept separate.
+        <div class="pill" id="srcPill">Skincare defaults: research-backed</div>
+        <details>
+          <summary>Where the defaults come from</summary>
+          <div style="margin-top:8px;color:var(--muted-2);line-height:1.6">
+            Skincare presets use our India D2C research (SocioLabs, Aurtos, InfluenceFlow, Storyboard18): launch Meta ROAS ~2.2x, influencer ROI ~5x, 85/15 ads-to-influencer split. EdTech, Fashion and Food are editable starting points, not researched figures yet. Custom lets you enter your own. Override any number on the left.
+          </div>
+        </details>
+      </div>
+    </section>
+  </div>
+</div>
+
+<script>
+const PRESETS = {
+  skincare:{label:'Skincare',          roasMeta:2.2, roasInf:5.0, aov:700,   split:85, researched:true},
+  edtech:  {label:'EdTech',            roasMeta:1.5, roasInf:3.0, aov:15000, split:75, researched:false},
+  fashion: {label:'Fashion & Apparel', roasMeta:2.8, roasInf:4.0, aov:1500,  split:70, researched:false},
+  food:    {label:'Food Products',     roasMeta:2.0, roasInf:4.0, aov:500,   split:80, researched:false},
+  custom:  {label:'Custom',            roasMeta:2.0, roasInf:4.0, aov:1000,  split:80, researched:false},
+};
+const DEFAULT_TARGET = {conv:5000, time:5};
+
+const $ = id => document.getElementById(id);
+const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+function compact(n){
+  if(!isFinite(n)) return '—';
+  if(n >= 1e7) return '₹' + (n/1e7).toFixed(2).replace(/\.00$/,'') + ' Cr';
+  if(n >= 1e5) return '₹' + (n/1e5).toFixed(2).replace(/\.00$/,'') + ' L';
+  return inr(n);
+}
+
+const els = {
+  conv:$('conv'), convNum:$('convNum'), time:$('time'), aov:$('aov'),
+  roasMeta:$('roasMeta'), roasInf:$('roasInf'), split:$('split'),
+  cap:$('cap'), agToggle:$('agToggle'), agency:$('agency'), customName:$('customName')
+};
+let currentInd = 'skincare';
+
+function indLabel(){
+  if(currentInd === 'custom'){
+    const v = (els.customName.value||'').trim();
+    return v ? v : 'Custom';
+  }
+  return PRESETS[currentInd].label;
+}
+function currentRate(){
+  const active = document.querySelector('#taxChips .chip.active');
+  if(!active) return 0;
+  if(active.dataset.rate === 'custom') return Math.max(0, Math.min(100, +$('taxCustom').value || 0));
+  return +active.dataset.rate;
+}
+
+function applyPreset(key){
+  currentInd = key;
+  const p = PRESETS[key];
+  els.roasMeta.value = p.roasMeta;
+  els.roasInf.value  = p.roasInf;
+  els.aov.value      = p.aov;
+  els.split.value    = p.split;
+  $('customRow').style.display = key === 'custom' ? 'block' : 'none';
+  const pill = $('srcPill');
+  pill.textContent = p.researched ? 'Skincare defaults: research-backed' : (indLabel()+' defaults: editable starting point');
+  pill.style.color = p.researched ? '' : 'var(--bad)';
+  compute();
+}
+
+function compute(){
+  const C   = Math.max(1, Math.round(+els.conv.value || 0));
+  const T   = +els.time.value;
+  const AOV = Math.max(1, +els.aov.value || 0);
+  const Rm  = +els.roasMeta.value;
+  const Ri  = +els.roasInf.value;
+  const s   = (+els.split.value)/100;
+  const cap = Math.max(0, +els.cap.value || 0);
+
+  $('convVal').textContent = C.toLocaleString('en-IN');
+  $('timeVal').textContent = T + (T===1?' month':' months');
+  $('roasMetaVal').textContent = Rm.toFixed(1)+'x';
+  $('roasInfVal').textContent  = Ri.toFixed(1)+'x';
+  $('splitVal').textContent = Math.round(s*100)+'% ads · '+Math.round((1-s)*100)+'% influencers';
+  $('heroK').textContent = 'Total fuel required · ' + indLabel();
+
+  const Cads = C * s, Cinf = C * (1-s);
+  const cacAds = Rm > 0 ? AOV/Rm : Infinity;
+  const cacInf = Ri > 0 ? AOV/Ri : Infinity;
+
+  $('impAds').textContent = isFinite(cacAds) ? inr(cacAds) : '—';
+  $('impInf').textContent = isFinite(cacInf) ? inr(cacInf) : '—';
+
+  const spendAds = Cads === 0 ? 0 : Cads * cacAds;
+  const spendInf = Cinf === 0 ? 0 : Cinf * cacInf;
+  const fuel = spendAds + spendInf;
+  const monthlyAds = spendAds / T;
+  const rev = C * AOV;
+
+  $('fuelBig').textContent = compact(fuel);
+  $('fuelSub').innerHTML = isFinite(fuel)
+    ? 'to acquire <b>'+C.toLocaleString('en-IN')+'</b> customers in <b>'+T+(T===1?' month':' months')+'</b>'
+    : 'set a ROAS above 0 for each channel in use';
+
+  const tot = (fuel>0 && isFinite(fuel)) ? fuel : 1;
+  $('segAds').style.width = (isFinite(spendAds)?spendAds/tot*100:0)+'%';
+  $('segInf').style.width = (isFinite(spendInf)?spendInf/tot*100:0)+'%';
+  $('legAds').textContent = 'Meta ads ' + compact(spendAds);
+  $('legInf').textContent = 'Influencers ' + compact(spendInf);
+
+  $('adsTot').textContent = compact(spendAds);
+  $('adsMo').textContent  = compact(monthlyAds);
+  $('adsCac').textContent = isFinite(cacAds) ? inr(cacAds) : '—';
+  $('infTot').textContent = compact(spendInf);
+  $('infMo').textContent  = compact(spendInf/T);
+  $('infCac').textContent = isFinite(cacInf) ? inr(cacInf) : '—';
+  $('pace').textContent   = Math.round(C/T).toLocaleString('en-IN');
+  $('rev').textContent    = compact(rev);
+  $('blendCac').textContent = isFinite(fuel) ? inr(fuel/C) : '—';
+
+  const ck = $('check');
+  if(cap <= 0){
+    ck.className = 'check idle';
+    ck.textContent = 'Add a monthly budget in step 4 to test whether this is reachable in time.';
+  } else if(!isFinite(monthlyAds)){
+    ck.className = 'check no';
+    ck.innerHTML = '<span class="badge">Check</span> Set Meta ROAS above 0 to test this.';
+  } else if(cap >= monthlyAds){
+    ck.className = 'check ok';
+    ck.innerHTML = '<span class="badge">On track</span> ₹'+Math.round(cap).toLocaleString('en-IN')+'/mo covers the <b>'+compact(monthlyAds)+'/mo</b> of ads needed. You have headroom.';
+  } else {
+    const custAtCap = Math.round((cap * T * Rm)/AOV);
+    const monthsNeeded = Math.ceil(spendAds / cap);
+    ck.className = 'check no';
+    ck.innerHTML = '<span class="badge">Short</span> At ₹'+Math.round(cap).toLocaleString('en-IN')+'/mo, ads reach about <b>'+custAtCap.toLocaleString('en-IN')+'</b> customers in '+T+' months. To get '+Math.round(Cads).toLocaleString('en-IN')+' from ads, raise to <b>'+compact(monthlyAds)+'/mo</b> or extend to <b>'+monthsNeeded+' months</b>.';
+  }
+
+  // totals + tax
+  const showAg = els.agToggle.checked;
+  const agMo = Math.max(0, +els.agency.value || 0);
+  const agTot = showAg ? agMo * T : 0;
+  const base = (isFinite(fuel)?fuel:0) + agTot;
+  const rate = currentRate();
+  const taxAmt = base * rate / 100;
+
+  $('totFuel').textContent = compact(fuel);
+  $('agLine').style.display = showAg ? 'flex' : 'none';
+  $('agMonths').textContent = showAg ? '('+inr(agMo)+'/mo × '+T+')' : '';
+  $('totAg').textContent = compact(agTot);
+  $('subAmt').textContent = compact(base);
+  $('taxLine').style.display = rate > 0 ? 'flex' : 'none';
+  $('taxLbl').textContent = 'Tax (' + rate + '%)';
+  $('taxAmt').textContent = compact(taxAmt);
+  $('grand').textContent = compact(base + taxAmt);
+  $('taxNote').textContent = rate > 0 ? ('Includes ' + rate + '% tax') : 'No tax added';
+}
+
+// sliders + number sync
+function syncFromSlider(){ els.convNum.value = Math.round(+els.conv.value); compute(); }
+function syncFromNumber(){
+  let v = Math.max(1, Math.round(+els.convNum.value||0));
+  els.conv.value = Math.min(100000, Math.max(100, v));
+  compute();
+}
+
+document.querySelectorAll('input[name=ind]').forEach(r => r.addEventListener('change', e => applyPreset(e.target.value)));
+els.conv.addEventListener('input', syncFromSlider);
+els.convNum.addEventListener('input', syncFromNumber);
+['time','aov','roasMeta','roasInf','split','cap','agency'].forEach(id => $(id).addEventListener('input', compute));
+els.customName.addEventListener('input', compute);
+els.agToggle.addEventListener('change', () => { $('agWrap').style.display = els.agToggle.checked ? 'block':'none'; compute(); });
+
+// tax chips
+document.querySelectorAll('#taxChips .chip').forEach(c => c.addEventListener('click', () => {
+  document.querySelectorAll('#taxChips .chip').forEach(x => x.classList.remove('active'));
+  c.classList.add('active');
+  $('taxCustomWrap').style.display = c.dataset.rate === 'custom' ? 'flex' : 'none';
+  if(c.dataset.rate === 'custom') $('taxCustom').focus();
+  compute();
+}));
+$('taxCustom').addEventListener('input', compute);
+
+$('reset').addEventListener('click', () => {
+  document.querySelector('input[name=ind][value=skincare]').checked = true;
+  els.conv.value = DEFAULT_TARGET.conv; els.convNum.value = DEFAULT_TARGET.conv;
+  els.time.value = DEFAULT_TARGET.time;
+  els.cap.value = 0; els.agToggle.checked = false; $('agWrap').style.display='none';
+  els.customName.value = '';
+  document.querySelectorAll('#taxChips .chip').forEach(x => x.classList.remove('active'));
+  document.querySelector('#taxChips .chip[data-rate="0"]').classList.add('active');
+  $('taxCustomWrap').style.display = 'none';
+  applyPreset('skincare');
+});
+
+applyPreset('skincare');
+</script>
+</body>
+</html>
