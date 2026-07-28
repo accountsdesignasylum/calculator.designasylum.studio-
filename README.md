@@ -20,13 +20,13 @@ repo into Hostinger's `public_html`.
 │   ├── css/  base.css · home.css · calculator.css
 │   ├── js/   calculators.js (manifest) · home.js · frame-resize.js
 │   ├── thumbnails/                  card images (1600×900, 16:9)
-│   └── logo/                        optional brand logo
+│   └── brand/                       logos (wordmark + mark, light/dark) + favicon.svg
 ├── calculators/                    ORIGINAL calculator HTML — do not edit
 │   ├── fuel-calculator.html
 │   └── retainer-calculator.html
 ├── fuel-calculator/index.html      wrapper page → iframes the file above
 ├── retainer-calculator/index.html
-├── favicon.svg · robots.txt · sitemap.xml · .htaccess · 404.html
+├── robots.txt · sitemap.xml · .htaccess · 404.html
 ```
 
 Clean URLs (folder-based, no rewrites needed):
@@ -87,9 +87,15 @@ Cards use `object-fit: cover`, so off-ratio images are center-cropped.
 The repo ships branded **SVG placeholders**; when you add a real image, drop it
 in and update that calculator's `thumbnail` path in `assets/js/calculators.js`.
 
-### Optional logo
-Put an SVG (preferred) or transparent PNG at `assets/logo/logo.svg`. Until then,
-the nav renders the Design Asylum "d" mark + wordmark in CSS.
+### Brand assets
+Logos and the favicon live in `assets/brand/`:
+- `logo-da-wordmark-inverse.svg` (white, 200×48) — used in the dark nav
+- `logo-da-wordmark-black.svg` (dark, for light backgrounds)
+- `logo-da-mark-inverse.png` / `logo-da-mark-black.png` (64×64 square marks)
+- `favicon.svg` — theme-adaptive "d" (dark on light tabs, white on dark tabs)
+
+To swap the nav logo, replace `logo-da-wordmark-inverse.svg` (keep the name) or
+update the `src` in each page's `.brand` link.
 
 ---
 
