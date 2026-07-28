@@ -31,7 +31,8 @@
   }
   .wrap{max-width:940px;margin:0 auto}
 
-  header{margin-bottom:36px;max-width:560px}
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:36px;flex-wrap:wrap}
+  .header-text{max-width:560px}
   h1{
     font-family:'Instrument Serif',Georgia,serif;
     font-weight:400;
@@ -40,6 +41,9 @@
     line-height:1.1;
   }
   header p{color:var(--muted);margin-top:10px}
+  .resetbtn{background:transparent;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:9px;cursor:pointer;min-height:44px;flex:0 0 auto;transition:all .12s ease}
+  .resetbtn:hover{color:var(--ink);border-color:var(--ink)}
+  .resetbtn:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
 
   .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
   @media(max-width:780px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
@@ -188,8 +192,11 @@
 <div class="wrap">
 
   <header>
-    <h1>Can your team take one more project?</h1>
-    <p>Treat every person's week as a budget of hours, and find out before you say yes.</p>
+    <div class="header-text">
+      <h1>Can your team take one more project?</h1>
+      <p>Treat every person's week as a budget of hours, and find out before you say yes.</p>
+    </div>
+    <button class="resetbtn" id="reset" type="button">Reset</button>
   </header>
 
   <div class="grid">
@@ -456,6 +463,14 @@
   });
 
   $('newHours').addEventListener('input', calc);
+
+  function resetAll(){
+    people = [ { name:'You', hours:30 }, { name:'Designer', hours:32 }, { name:'Developer', hours:35 } ];
+    projects = [ { name:'Client A', hours:25, who:0 }, { name:'Client B', hours:30, who:'team' }, { name:'Internal work', hours:19, who:'team' } ];
+    $('newHours').value = '';
+    renderPeople(); renderProjects(); calc();
+  }
+  $('reset').addEventListener('click', resetAll);
 
   renderPeople();
   renderProjects();
