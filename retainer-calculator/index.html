@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Retainer Calculator — Design Asylum Studio</title>
+  <meta name="description" content="Work backwards from what you want to keep to find the retainer you should charge. A free tool by Design Asylum Studio.">
+  <meta name="theme-color" content="#0A0A0B">
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Retainer Calculator — Design Asylum Studio">
+  <meta property="og:description" content="Work backwards from your take-home to find what you should charge.">
+  <meta property="og:url" content="https://calculator.designasylum.studio/retainer-calculator/">
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/calculator.css">
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <div class="nav__left">
+        <a class="brand" href="/" aria-label="Design Asylum Studio Calculators — home">
+          <span class="brand__mark">d</span>
+          <span class="brand__text">
+            <span class="brand__eyebrow">Design Asylum</span>
+            <span class="brand__name">Calculators</span>
+          </span>
+        </a>
+        <a class="nav__back" href="/">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18 9 12l6-6"></path></svg>
+          All calculators
+        </a>
+      </div>
+      <a class="btn btn--primary" href="https://designasylum.in" target="_blank" rel="noopener">
+        <span class="btn__label">Visit Design Asylum Studio Website</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M7 17 17 7"></path><path d="M7 7h10v10"></path></svg>
+      </a>
+    </div>
+  </header>
+
+  <!-- ============ CALCULATOR ============ -->
+  <main class="calc-main">
+    <div class="container">
+      <h1 class="visually-hidden">Retainer Calculator</h1>
+      <div class="calc-frame">
+        <!-- The original calculator is loaded UNTOUCHED, same-origin. -->
+        <iframe id="calcFrame" src="/calculators/retainer-calculator.html"
+                title="Retainer Calculator" loading="eager" scrolling="no"></iframe>
+      </div>
+      <p class="calc-note">
+        Trouble viewing it here?
+        <a href="/calculators/retainer-calculator.html" target="_blank" rel="noopener">Open the calculator in a new tab ↗</a>
+      </p>
+    </div>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>All rights reserved by Design Asylum Studio LLP</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/frame-resize.js"></script>
+</body>
+</html>

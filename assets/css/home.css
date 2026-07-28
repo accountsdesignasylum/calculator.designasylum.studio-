@@ -1,0 +1,109 @@
+/* ==========================================================================
+   home.css : homepage hero + thumbnail card grid
+   ========================================================================== */
+
+/* ---- hero ---- */
+.hero{
+  padding-top:clamp(40px,7vw,84px);
+  padding-bottom:clamp(28px,4vw,44px);
+}
+.hero__eyebrow{
+  display:inline-flex;align-items:center;gap:9px;
+  font-size:12px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--accent);
+  padding:7px 13px;border:1px solid var(--border);border-radius:999px;
+  background:rgba(255,106,31,.06);
+}
+.hero__eyebrow i{width:6px;height:6px;border-radius:50%;background:var(--accent)}
+.hero h1{
+  font-family:Anton,Inter,sans-serif;font-weight:400;
+  font-size:clamp(38px,6.4vw,76px);line-height:1.02;letter-spacing:.01em;
+  text-transform:uppercase;margin:18px 0 0;max-width:16ch;
+}
+.hero h1 em{font-style:normal;color:var(--accent)}
+.hero__sub{
+  margin:16px 0 0;max-width:56ch;
+  color:var(--muted);font-size:clamp(15px,1.4vw,18px);line-height:1.6;
+}
+
+/* ---- section head above the grid ---- */
+.gallery{padding-bottom:clamp(48px,7vw,96px)}
+.gallery__head{
+  display:flex;align-items:baseline;justify-content:space-between;gap:16px;
+  margin-bottom:clamp(20px,2.5vw,32px);flex-wrap:wrap;
+}
+.gallery__head h2{
+  font-size:13px;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--muted);margin:0;
+}
+.gallery__count{font-size:13px;color:var(--muted-2)}
+
+/* ---- grid: 1 → 2 → 3 → 4+ columns automatically ---- */
+.card-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fill,minmax(300px,1fr));
+  gap:clamp(18px,2vw,28px);
+}
+
+/* ==========================================================================
+   Thumbnail card — mirrors the reference ProjectCard, dark palette
+   ========================================================================== */
+.card{
+  position:relative;display:flex;flex-direction:column;
+  overflow:hidden;cursor:pointer;
+  background:var(--panel);color:var(--ink);
+  border:1px solid var(--border);
+  border-radius:var(--radius-lg);
+  box-shadow:var(--shadow-sm);
+  transition:transform .5s var(--ease), box-shadow .5s var(--ease), border-color .5s var(--ease);
+}
+.card:hover,.card:focus-within{
+  transform:translateY(-8px);
+  box-shadow:var(--shadow-xl);
+  border-color:rgba(255,106,31,.4);
+}
+
+/* image (16:9) */
+.card__media{aspect-ratio:16/9;overflow:hidden;background:var(--panel-2);position:relative}
+.card__media img{
+  width:100%;height:100%;object-fit:cover;
+  transition:transform .7s var(--ease);
+}
+.card:hover .card__media img,
+.card:focus-within .card__media img{transform:scale(1.1)}
+.card__media::after{
+  content:"";position:absolute;inset:0;
+  background:linear-gradient(180deg,transparent 55%,rgba(10,10,11,.35));
+  pointer-events:none;
+}
+
+/* body */
+.card__body{display:flex;flex-direction:column;flex:1;padding:clamp(18px,1.6vw,24px)}
+.card__title{
+  font-size:clamp(19px,1.5vw,22px);font-weight:600;letter-spacing:-.01em;margin:0;
+  transition:color .3s var(--ease);
+}
+.card:hover .card__title,
+.card:focus-within .card__title{color:var(--accent)}
+.card__desc{margin:12px 0 0;flex:1;color:var(--muted);font-size:14.5px;line-height:1.55}
+
+/* CTA link */
+.card__cta{
+  margin-top:18px;display:inline-flex;align-items:center;gap:8px;
+  font-size:14px;font-weight:600;color:var(--accent);
+}
+.card__cta svg{width:16px;height:16px;transition:transform .3s var(--ease)}
+.card:hover .card__cta svg,
+.card:focus-within .card__cta svg{transform:translateX(4px)}
+
+/* stretched link makes the whole card clickable & keyboard-focusable */
+.card__link::after{content:"";position:absolute;inset:0;z-index:1;border-radius:inherit}
+.card__link:focus-visible{outline:none}
+.card:focus-within{outline:2px solid var(--accent);outline-offset:3px}
+
+/* empty state (no calculators in manifest) */
+.empty{
+  border:1px dashed var(--border);border-radius:var(--radius);
+  padding:48px 24px;text-align:center;color:var(--muted-2);
+  grid-column:1/-1;
+}

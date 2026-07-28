@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Business Calculators — Design Asylum Studio</title>
+  <meta name="description" content="Free, no-signup calculators for small businesses by Design Asylum Studio. Plan spend, price your work, and make faster decisions.">
+  <meta name="theme-color" content="#0A0A0B">
+
+  <!-- Open Graph -->
+  <meta property="og:type" content="website">
+  <meta property="og:title" content="Business Calculators — Design Asylum Studio">
+  <meta property="og:description" content="Free, no-signup calculators for small businesses by Design Asylum Studio.">
+  <meta property="og:url" content="https://calculator.designasylum.studio/">
+
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Anton&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+  <link rel="stylesheet" href="/assets/css/base.css">
+  <link rel="stylesheet" href="/assets/css/home.css">
+</head>
+<body>
+
+  <!-- ============ NAV ============ -->
+  <header class="nav">
+    <div class="container nav__inner">
+      <a class="brand" href="/" aria-label="Design Asylum Studio — home">
+        <span class="brand__mark">d</span>
+        <span class="brand__text">
+          <span class="brand__eyebrow">Design Asylum</span>
+          <span class="brand__name">Calculators</span>
+        </span>
+      </a>
+      <a class="btn btn--primary" href="https://designasylum.in" target="_blank" rel="noopener">
+        <span class="btn__label">Visit Design Asylum Studio Website</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M7 17 17 7"></path><path d="M7 7h10v10"></path>
+        </svg>
+      </a>
+    </div>
+  </header>
+
+  <main>
+    <!-- ============ HERO ============ -->
+    <section class="container hero">
+      <span class="hero__eyebrow"><i></i> Free tools for small businesses</span>
+      <h1>Calculators that do the <em>hard math</em> for you.</h1>
+      <p class="hero__sub">Pick a calculator, plug in your numbers, and get a clear answer in seconds. No sign-up, no spreadsheets — just practical tools from Design Asylum Studio.</p>
+    </section>
+
+    <!-- ============ GALLERY ============ -->
+    <section class="container gallery">
+      <div class="gallery__head">
+        <h2>All calculators</h2>
+        <span class="gallery__count" id="calcCount"></span>
+      </div>
+      <div class="card-grid" id="cardGrid">
+        <!-- cards injected by home.js from assets/js/calculators.js -->
+        <noscript>
+          <div class="empty">Please enable JavaScript to browse the calculators, or open one directly: <a href="/fuel-calculator/">Fuel Calculator</a>, <a href="/retainer-calculator/">Retainer Calculator</a>.</div>
+        </noscript>
+      </div>
+    </section>
+  </main>
+
+  <!-- ============ FOOTER ============ -->
+  <footer class="site-footer">
+    <div class="container site-footer__inner">
+      <p>All rights reserved by Design Asylum Studio LLP</p>
+    </div>
+  </footer>
+
+  <script src="/assets/js/calculators.js"></script>
+  <script src="/assets/js/home.js"></script>
+</body>
+</html>

@@ -1,0 +1,46 @@
+# ==========================================================================
+# Design Asylum — Calculators  |  Apache config for Hostinger (static site)
+# No rewrites needed: URLs are folder-based (/fuel-calculator/ -> index.html).
+# ==========================================================================
+
+# Serve index.html for directory requests
+DirectoryIndex index.html
+
+# UTF-8 everywhere
+AddDefaultCharset UTF-8
+
+# Friendly 404
+ErrorDocument 404 /404.html
+
+# ---- Correct MIME types (older hosts) ----
+<IfModule mod_mime.c>
+  AddType image/svg+xml         .svg
+  AddType image/webp            .webp
+  AddType text/css              .css
+  AddType application/javascript .js
+</IfModule>
+
+# ---- Compression ----
+<IfModule mod_deflate.c>
+  AddOutputFilterByType DEFLATE text/html text/css application/javascript image/svg+xml application/xml text/plain
+</IfModule>
+
+# ---- Caching ----
+<IfModule mod_expires.c>
+  ExpiresActive On
+  # Long cache for static assets (fingerprint/replace on change)
+  ExpiresByType image/svg+xml   "access plus 30 days"
+  ExpiresByType image/webp      "access plus 30 days"
+  ExpiresByType image/jpeg      "access plus 30 days"
+  ExpiresByType image/png       "access plus 30 days"
+  ExpiresByType text/css        "access plus 7 days"
+  ExpiresByType application/javascript "access plus 7 days"
+  # HTML should revalidate so content updates show up fast
+  ExpiresByType text/html       "access plus 0 seconds"
+</IfModule>
+
+# ---- Light security headers ----
+<IfModule mod_headers.c>
+  Header set X-Content-Type-Options "nosniff"
+  Header set Referrer-Policy "strict-origin-when-cross-origin"
+</IfModule>

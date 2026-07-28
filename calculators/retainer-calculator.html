@@ -1,0 +1,404 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Retainer calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EF;
+    --card:#FFFDFA;
+    --ink:#14130F;
+    --muted:#6E6A61;
+    --line:#E2DED6;
+    --clay:#C7452A;
+    --clay-soft:#F6E4DE;
+    --stone:#B8B2A6;
+    --slate:#7B766C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 20px 80px;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+
+  header{margin-bottom:36px;max-width:520px}
+  h1{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-weight:400;
+    font-size:42px;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  header p{color:var(--muted);margin-top:10px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:780px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+
+  .field{margin-bottom:26px}
+  .field:last-child{margin-bottom:0}
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    letter-spacing:.01em;
+    margin-bottom:9px;
+  }
+  .hint{font-size:12.5px;color:var(--muted);margin-top:7px;min-height:1em}
+
+  .input-row{position:relative;display:flex;align-items:center}
+  .prefix,.suffix{
+    position:absolute;color:var(--muted);font-size:15px;pointer-events:none;
+  }
+  .prefix{left:14px}
+  .suffix{right:14px}
+  input[type=text]{
+    width:100%;
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+    color:var(--ink);
+    transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  input.with-prefix{padding-left:30px}
+  input.with-suffix{padding-right:34px}
+  input:focus{
+    outline:none;
+    border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(20,19,15,.06);
+  }
+
+  .chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .chip{
+    font:inherit;font-size:12.5px;
+    padding:5px 11px;
+    border:1px solid var(--line);
+    background:transparent;
+    border-radius:99px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--ink);color:var(--ink)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:var(--card)}
+
+  .toggle{
+    display:inline-flex;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:3px;
+    margin-bottom:11px;
+  }
+  .toggle button{
+    font:inherit;font-size:13px;
+    padding:6px 14px;
+    border:0;background:transparent;border-radius:6px;
+    cursor:pointer;color:var(--muted);
+    transition:all .12s ease;
+  }
+  .toggle button.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+
+  /* results */
+  .result{background:var(--ink);color:#F7F5F1;border-color:var(--ink)}
+  .result .eyebrow{
+    font-size:12px;text-transform:uppercase;letter-spacing:.09em;
+    color:#9C9689;margin-bottom:12px;
+  }
+  .headline{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:52px;line-height:1;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+  }
+  @media(max-width:780px){ .headline{font-size:42px} }
+  .round-note{color:#9C9689;font-size:13.5px;margin-top:12px}
+  .round-note b{color:#F7F5F1;font-weight:500}
+
+  .bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:28px 0 20px;background:#2A2823}
+  .bar span{display:block;height:100%;transition:width .25s ease}
+  .seg-exp{background:var(--stone)}
+  .seg-tax{background:var(--slate)}
+  .seg-keep{background:var(--clay)}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  td{padding:11px 0;border-bottom:1px solid #2A2823;font-size:14.5px}
+  tr:last-child td{border-bottom:0}
+  td.val{text-align:right;font-weight:500}
+  td.key{color:#B5AFA3}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:9px;vertical-align:middle}
+  .pct{color:#8B8578;font-size:12.5px;margin-left:8px;font-weight:400}
+  tr.keep td{color:#F7F5F1;font-size:15.5px;padding-top:14px}
+  tr.keep td.val{color:#EFA48F}
+
+  .warn{
+    background:var(--clay-soft);
+    border:1px solid #E9C4B8;
+    color:#7E2B18;
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14px;
+  }
+  .warn b{font-weight:600}
+
+  footer{
+    margin-top:28px;color:var(--muted);font-size:13px;line-height:1.65;
+    max-width:640px;
+  }
+  footer b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>What should I charge?</h1>
+    <p>Work backwards from what you actually want to keep.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="field">
+        <label for="expense">Monthly project expense</label>
+        <div class="input-row">
+          <span class="prefix">₹</span>
+          <input type="text" id="expense" class="with-prefix" inputmode="numeric" value="1,32,000" autocomplete="off">
+        </div>
+        <div class="hint">Salaries, tools, contractors, anything the project eats.</div>
+      </div>
+
+      <div class="field">
+        <label for="tax">Tax rate</label>
+        <div class="input-row">
+          <input type="text" id="tax" class="with-suffix" inputmode="decimal" value="30" autocomplete="off">
+          <span class="suffix">%</span>
+        </div>
+        <div class="chips" id="taxChips">
+          <button class="chip" data-tax="5">5%</button>
+          <button class="chip" data-tax="20">20%</button>
+          <button class="chip on" data-tax="30">30%</button>
+          <button class="chip" data-tax="22">22% corporate</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <label>What you want to take home</label>
+        <div class="toggle" id="modeToggle">
+          <button data-mode="pct" class="on">As a % of the retainer</button>
+          <button data-mode="amt">As a fixed amount</button>
+        </div>
+
+        <div class="input-row" id="pctWrap">
+          <input type="text" id="targetPct" class="with-suffix" inputmode="decimal" value="33" autocomplete="off">
+          <span class="suffix">%</span>
+        </div>
+
+        <div class="input-row" id="amtWrap" style="display:none">
+          <span class="prefix">₹</span>
+          <input type="text" id="targetAmt" class="with-prefix" inputmode="numeric" value="1,00,000" autocomplete="off">
+        </div>
+
+        <div class="hint" id="targetHint">Cash in your pocket after tax, as a share of what the client pays.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultCard" class="card result">
+      <div class="eyebrow">Charge at least</div>
+      <div class="headline" id="headline">₹2,49,730</div>
+      <div class="round-note" id="roundNote">Round up and quote <b>₹2,50,000</b>.</div>
+
+      <div class="bar">
+        <span class="seg-exp" id="segExp" style="width:53%"></span>
+        <span class="seg-tax" id="segTax" style="width:14%"></span>
+        <span class="seg-keep" id="segKeep" style="width:33%"></span>
+      </div>
+
+      <table>
+        <tr>
+          <td class="key"><span class="dot" style="background:#F7F5F1;opacity:.35"></span>Client pays</td>
+          <td class="val" id="rRev">₹2,49,730</td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-exp"></span>Project expense<span class="pct" id="pExp">53%</span></td>
+          <td class="val" id="rExp">₹1,32,000</td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-tax"></span>Tax<span class="pct" id="pTax">14%</span></td>
+          <td class="val" id="rTax">₹35,319</td>
+        </tr>
+        <tr class="keep">
+          <td class="key"><span class="dot seg-keep"></span>You keep<span class="pct" id="pKeep">33%</span></td>
+          <td class="val" id="rKeep">₹82,411</td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="warnCard" class="card warn" style="display:none"></div>
+
+  </div>
+
+  <footer>
+    <b>How the math works.</b> Take-home is the profit left after tax, so profit = retainer minus expense, and you keep 100% minus your tax rate of that. To hit a take-home target that is a share of the retainer, the rate you pay and the share you keep have to add up to less than 100%, otherwise no price works.<br><br>
+    <b>One caveat.</b> This applies a flat rate to profit. Real Indian tax depends on structure: a proprietorship pays slab rates, a company pays corporate tax, and presumptive taxation under 44ADA changes the taxable base entirely. Use this to set a floor, not to file returns.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var mode = 'pct';
+  var $ = function(id){ return document.getElementById(id); };
+
+  function parseNum(v){
+    var n = parseFloat(String(v).replace(/[^0-9.]/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+  function inr(n){
+    return '₹' + Math.round(n).toLocaleString('en-IN');
+  }
+  function fmtIn(n){
+    return Math.round(n).toLocaleString('en-IN');
+  }
+
+  function show(el, on){ el.style.display = on ? '' : 'none'; }
+
+  function calc(){
+    var E = parseNum($('expense').value);
+    var t = parseNum($('tax').value) / 100;
+    var warn = $('warnCard'), res = $('resultCard');
+
+    if (t < 0 || t >= 1){
+      warn.innerHTML = '<b>That tax rate does not work.</b> Enter something between 0 and 99.';
+      show(warn, true); show(res, false); return;
+    }
+
+    var R;
+    if (mode === 'pct'){
+      var p = parseNum($('targetPct').value) / 100;
+      var denom = 1 - t - p;
+      if (p <= 0){
+        warn.innerHTML = '<b>Set a take-home target above zero.</b>';
+        show(warn, true); show(res, false); return;
+      }
+      if (denom <= 0){
+        var max = ((1 - t) * 100).toFixed(0);
+        warn.innerHTML = '<b>No price gets you there.</b> After tax at ' + (t*100).toFixed(0) +
+          '%, you keep at most ' + max + '% of the retainer, and that only happens if your expenses are zero. ' +
+          'Pick a target under ' + max + '%, or cut the expense.';
+        show(warn, true); show(res, false); return;
+      }
+      if (E <= 0){
+        warn.innerHTML = '<b>Add your monthly expense first.</b> With zero cost, any price hits your percentage.';
+        show(warn, true); show(res, false); return;
+      }
+      R = E * (1 - t) / denom;
+    } else {
+      var A = parseNum($('targetAmt').value);
+      if (A <= 0){
+        warn.innerHTML = '<b>Set a take-home amount above zero.</b>';
+        show(warn, true); show(res, false); return;
+      }
+      R = E + A / (1 - t);
+    }
+
+    show(warn, false); show(res, true);
+
+    var profit = R - E;
+    var tax = profit * t;
+    var keep = profit - tax;
+
+    var pe = E / R * 100, pt = tax / R * 100, pk = keep / R * 100;
+    var rounded = Math.ceil(R / 5000) * 5000;
+
+    $('headline').textContent = inr(R);
+    $('roundNote').innerHTML = (rounded > R + 1)
+      ? 'Round up and quote <b>' + inr(rounded) + '</b>.'
+      : 'That is already a clean number. Quote <b>' + inr(R) + '</b>.';
+
+    $('segExp').style.width  = pe.toFixed(2) + '%';
+    $('segTax').style.width  = pt.toFixed(2) + '%';
+    $('segKeep').style.width = pk.toFixed(2) + '%';
+
+    $('rRev').textContent  = inr(R);
+    $('rExp').textContent  = inr(E);
+    $('rTax').textContent  = inr(tax);
+    $('rKeep').textContent = inr(keep);
+
+    $('pExp').textContent  = pe.toFixed(1) + '%';
+    $('pTax').textContent  = pt.toFixed(1) + '%';
+    $('pKeep').textContent = pk.toFixed(1) + '%';
+  }
+
+  // mode toggle
+  Array.prototype.forEach.call($('modeToggle').children, function(btn){
+    btn.addEventListener('click', function(){
+      Array.prototype.forEach.call($('modeToggle').children, function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      mode = btn.dataset.mode;
+      show($('pctWrap'), mode === 'pct');
+      show($('amtWrap'), mode === 'amt');
+      $('targetHint').textContent = (mode === 'pct')
+        ? 'Cash in your pocket after tax, as a share of what the client pays.'
+        : 'Cash in your pocket after tax, every month.';
+      calc();
+    });
+  });
+
+  // tax chips
+  Array.prototype.forEach.call($('taxChips').children, function(chip){
+    chip.addEventListener('click', function(){
+      $('tax').value = chip.dataset.tax;
+      syncChips();
+      calc();
+    });
+  });
+  function syncChips(){
+    var v = $('tax').value.trim();
+    Array.prototype.forEach.call($('taxChips').children, function(c){
+      c.classList.toggle('on', c.dataset.tax === v);
+    });
+  }
+
+  // rupee inputs: recalc live, pretty-print on blur
+  ['expense','targetAmt'].forEach(function(id){
+    var el = $(id);
+    el.addEventListener('input', calc);
+    el.addEventListener('blur', function(){
+      var n = parseNum(el.value);
+      el.value = n ? fmtIn(n) : '';
+      calc();
+    });
+    el.addEventListener('focus', function(){
+      el.value = String(parseNum(el.value) || '');
+    });
+  });
+
+  $('tax').addEventListener('input', function(){ syncChips(); calc(); });
+  $('targetPct').addEventListener('input', calc);
+
+  calc();
+})();
+</script>
+</body>
+</html>
