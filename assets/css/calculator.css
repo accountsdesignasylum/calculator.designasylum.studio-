@@ -41,12 +41,3 @@
   .calc-frame{border-radius:var(--radius)}
   .calc-frame iframe{min-height:900px}
 }
-
-/* thin helper line under the frame */
-.calc-note{
-  margin:14px 2px 0;
-  font-size:12.5px;color:var(--muted-2);
-  display:flex;align-items:center;gap:8px;flex-wrap:wrap;
-}
-.calc-note a{color:var(--muted);text-decoration:underline;text-underline-offset:2px}
-.calc-note a:hover{color:var(--ink)}
