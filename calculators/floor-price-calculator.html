@@ -1,0 +1,406 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Floor price calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EF;
+    --card:#FFFDFA;
+    --ink:#14130F;
+    --muted:#6E6A61;
+    --line:#E2DED6;
+    --clay:#C7452A;
+    --clay-soft:#F6E4DE;
+    --stone:#B8B2A6;
+    --slate:#7B766C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 20px 80px;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+
+  header{margin-bottom:36px;max-width:520px}
+  h1{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-weight:400;
+    font-size:42px;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  header p{color:var(--muted);margin-top:10px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:780px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+
+  .field{margin-bottom:26px}
+  .field:last-child{margin-bottom:0}
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    letter-spacing:.01em;
+    margin-bottom:9px;
+  }
+  .hint{font-size:12.5px;color:var(--muted);margin-top:7px;min-height:1em}
+
+  .input-row{position:relative;display:flex;align-items:center}
+  .prefix,.suffix{
+    position:absolute;color:var(--muted);font-size:15px;pointer-events:none;
+  }
+  .prefix{left:14px}
+  .suffix{right:14px}
+  input[type=text]{
+    width:100%;
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+    color:var(--ink);
+    transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  input.with-prefix{padding-left:30px}
+  input:focus{
+    outline:none;
+    border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(20,19,15,.06);
+  }
+
+  .chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .chip{
+    font:inherit;font-size:12.5px;
+    padding:5px 11px;
+    border:1px solid var(--line);
+    background:transparent;
+    border-radius:99px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--ink);color:var(--ink)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:var(--card)}
+
+  .toggle{
+    display:inline-flex;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:3px;
+    margin-bottom:11px;
+  }
+  .toggle button{
+    font:inherit;font-size:13px;
+    padding:6px 14px;
+    border:0;background:transparent;border-radius:6px;
+    cursor:pointer;color:var(--muted);
+    transition:all .12s ease;
+  }
+  .toggle button.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+
+  /* sliders */
+  .slider-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .slider-val{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:26px;line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .slider-val span{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);margin-left:3px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:20px;
+    background:transparent;
+    cursor:pointer;
+    display:block;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:4px;border-radius:99px;background:var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:18px;height:18px;border-radius:99px;
+    background:var(--ink);border:3px solid var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+    margin-top:-7px;
+    transition:transform .12s ease;
+  }
+  input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:99px;background:var(--line)}
+  input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:99px;
+    background:var(--ink);border:3px solid var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+  }
+  input[type=range]:focus{outline:none}
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(20,19,15,.14)}
+  .ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px;margin-top:2px}
+
+  /* results */
+  .result{background:var(--ink);color:#F7F5F1;border-color:var(--ink)}
+  .result .eyebrow{
+    font-size:12px;text-transform:uppercase;letter-spacing:.09em;
+    color:#9C9689;margin-bottom:12px;
+  }
+  .headline{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:52px;line-height:1;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+  }
+  @media(max-width:780px){ .headline{font-size:42px} }
+  .round-note{color:#9C9689;font-size:13.5px;margin-top:12px}
+  .round-note b{color:#F7F5F1;font-weight:500}
+
+  .bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:28px 0 20px;background:#2A2823}
+  .bar span{display:block;height:100%;transition:width .25s ease}
+  .seg-cost{background:var(--stone)}
+  .seg-profit{background:var(--clay)}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  td{padding:11px 0;border-bottom:1px solid #2A2823;font-size:14.5px}
+  tr:last-child td{border-bottom:0}
+  td.val{text-align:right;font-weight:500}
+  td.key{color:#B5AFA3}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:9px;vertical-align:middle}
+  .pct{color:#8B8578;font-size:12.5px;margin-left:8px;font-weight:400}
+  tr.keep td{color:#F7F5F1;font-size:15.5px;padding-top:14px}
+  tr.keep td.val{color:#EFA48F}
+
+  .warn{
+    background:var(--clay-soft);
+    border:1px solid #E9C4B8;
+    color:#7E2B18;
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14px;
+  }
+  .warn b{font-weight:600}
+
+  footer{
+    margin-top:28px;color:var(--muted);font-size:13px;line-height:1.65;
+    max-width:640px;
+  }
+  footer b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>What is the lowest you can go?</h1>
+    <p>Every project has a price below which you are paying to work. Find yours.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="field">
+        <label for="costs">Fixed monthly costs</label>
+        <div class="input-row">
+          <span class="prefix">&#8377;</span>
+          <input type="text" id="costs" class="with-prefix" inputmode="numeric" value="2,40,000" autocomplete="off">
+        </div>
+        <div class="hint">Rent, salaries, tools, subscriptions. What it costs to keep the lights on even with zero clients.</div>
+      </div>
+
+      <div class="field">
+        <label>Profit you want per month</label>
+        <div class="toggle" id="modeToggle">
+          <button data-mode="amt" class="on">As a fixed amount</button>
+          <button data-mode="pct">As a % of what you bill</button>
+        </div>
+
+        <div class="input-row" id="amtWrap">
+          <span class="prefix">&#8377;</span>
+          <input type="text" id="profit" class="with-prefix" inputmode="numeric" value="1,00,000" autocomplete="off">
+        </div>
+
+        <div id="pctWrap" style="display:none">
+          <div class="slider-head">
+            <span class="slider-val" id="marginVal">30<span>%</span></span>
+            <span class="hint" style="margin:0" id="marginAmt">&#8377;1,02,857 a month</span>
+          </div>
+          <input type="range" id="margin" min="1" max="80" step="1" value="30">
+          <div class="ticks"><span>1%</span><span>40%</span><span>80%</span></div>
+        </div>
+
+        <div class="hint" id="profitHint">What should be left after the costs are paid. Before tax.</div>
+      </div>
+
+      <div class="field">
+        <label>Projects you can run at the same time</label>
+        <div class="slider-head">
+          <span class="slider-val" id="projVal">3<span>projects</span></span>
+        </div>
+        <input type="range" id="projects" min="1" max="15" step="1" value="3">
+        <div class="ticks"><span>1</span><span>8</span><span>15</span></div>
+        <div class="hint">Be honest. The number you can do well, not the number you can survive.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultCard" class="card result">
+      <div class="eyebrow">Never quote below</div>
+      <div class="headline" id="headline">&#8377;1,13,333</div>
+      <div class="round-note" id="roundNote">Round up and hold the line at <b>&#8377;1,15,000</b> per project.</div>
+
+      <div class="bar">
+        <span class="seg-cost" id="segCost" style="width:70%"></span>
+        <span class="seg-profit" id="segProfit" style="width:30%"></span>
+      </div>
+
+      <table>
+        <tr>
+          <td class="key">Each project must bring in</td>
+          <td class="val" id="rFloor">&#8377;1,13,333</td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-cost"></span>Its share of your costs<span class="pct" id="pCost">70%</span></td>
+          <td class="val" id="rCost">&#8377;80,000</td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-profit"></span>Its share of your profit<span class="pct" id="pProfit">30%</span></td>
+          <td class="val" id="rProfit">&#8377;33,333</td>
+        </tr>
+        <tr class="keep">
+          <td class="key">All projects together</td>
+          <td class="val" id="rTotal">&#8377;3,40,000</td>
+        </tr>
+      </table>
+    </div>
+
+    <div id="warnCard" class="card warn" style="display:none"></div>
+
+  </div>
+
+  <footer>
+    <b>How the math works.</b> Your costs and your profit target together make the money the month has to produce, and each project has to carry an equal share of it, so the floor is costs plus profit divided by the number of projects. Quote below the floor and the other projects have to cover the gap, because the costs do not shrink just because one client paid less.<br><br>
+    <b>If you set profit as a percentage</b>, it is a share of what you bill, not a markup on your costs. So your costs have to fit inside the rest, which means total billing is costs divided by 100% minus that share. At 30% the costs take up 70% of what you bill, and that is why the percentage cannot reach 100.<br><br>
+    <b>One caveat.</b> This assumes every project is the same size, which is rarely true. Use the floor as your walk-away number in a negotiation, and if one project comes in under it, know exactly how much the others now have to carry.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var mode = 'amt';
+  var $ = function(id){ return document.getElementById(id); };
+
+  function parseNum(v){
+    var n = parseFloat(String(v).replace(/[^0-9.]/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+  function inr(n){ return '₹' + Math.round(n).toLocaleString('en-IN'); }
+  function fmtIn(n){ return Math.round(n).toLocaleString('en-IN'); }
+  function show(el, on){ el.style.display = on ? '' : 'none'; }
+
+  function calc(){
+    var C = parseNum($('costs').value);
+    var N = Math.round(parseNum($('projects').value));
+    var warn = $('warnCard'), res = $('resultCard');
+
+    $('projVal').innerHTML = N + '<span>' + (N === 1 ? 'project' : 'projects') + '</span>';
+
+    var P, total;
+
+    if (mode === 'amt'){
+      P = parseNum($('profit').value);
+      total = C + P;
+      if (C <= 0 && P <= 0){
+        warn.innerHTML = '<b>Add your costs and profit target first.</b> The floor is built out of those two numbers.';
+        show(warn, true); show(res, false); return;
+      }
+    } else {
+      var m = parseNum($('margin').value) / 100;
+      $('marginVal').innerHTML = Math.round(m*100) + '<span>%</span>';
+      if (C <= 0){
+        $('marginAmt').textContent = 'Add your costs first';
+        warn.innerHTML = '<b>Add your fixed monthly costs first.</b> A percentage on its own has nothing to work against.';
+        show(warn, true); show(res, false); return;
+      }
+      total = C / (1 - m);
+      P = total - C;
+      $('marginAmt').textContent = inr(P) + ' a month';
+    }
+
+    show(warn, false); show(res, true);
+
+    var floor = total / N;
+    var costShare = C / N;
+    var profitShare = P / N;
+    var pc = total > 0 ? C / total * 100 : 0;
+    var pp = total > 0 ? P / total * 100 : 0;
+    var rounded = Math.ceil(floor / 5000) * 5000;
+
+    $('headline').textContent = inr(floor);
+    $('roundNote').innerHTML = (rounded > floor + 1)
+      ? 'Round up and hold the line at <b>' + inr(rounded) + '</b> per project.'
+      : 'That is already a clean number. Hold the line at <b>' + inr(floor) + '</b> per project.';
+
+    $('segCost').style.width   = pc.toFixed(2) + '%';
+    $('segProfit').style.width = pp.toFixed(2) + '%';
+
+    $('rFloor').textContent  = inr(floor);
+    $('rCost').textContent   = inr(costShare);
+    $('rProfit').textContent = inr(profitShare);
+    $('rTotal').textContent  = inr(total);
+
+    $('pCost').textContent   = pc.toFixed(1) + '%';
+    $('pProfit').textContent = pp.toFixed(1) + '%';
+  }
+
+  // mode toggle
+  Array.prototype.forEach.call($('modeToggle').children, function(btn){
+    btn.addEventListener('click', function(){
+      Array.prototype.forEach.call($('modeToggle').children, function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      mode = btn.dataset.mode;
+      show($('amtWrap'), mode === 'amt');
+      show($('pctWrap'), mode === 'pct');
+      $('profitHint').textContent = (mode === 'amt')
+        ? 'What should be left after the costs are paid. Before tax.'
+        : 'The share of everything you bill that stays with you after costs. Before tax.';
+      calc();
+    });
+  });
+
+  ['costs','profit'].forEach(function(id){
+    var el = $(id);
+    el.addEventListener('input', calc);
+    el.addEventListener('blur', function(){
+      var n = parseNum(el.value);
+      el.value = n ? fmtIn(n) : '';
+      calc();
+    });
+    el.addEventListener('focus', function(){
+      el.value = String(parseNum(el.value) || '');
+    });
+  });
+
+  $('margin').addEventListener('input', calc);
+  $('projects').addEventListener('input', calc);
+
+  calc();
+})();
+</script>
+</body>
+</html>
