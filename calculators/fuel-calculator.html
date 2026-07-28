@@ -165,13 +165,44 @@
   details{margin-top:11px}
   summary{cursor:pointer;color:var(--muted);font-size:12.5px;min-height:28px;display:flex;align-items:center}
   summary:hover{color:var(--ink)}
+
+  /* header mark → real Design Asylum logomark */
+  .dmark img{width:62%;height:62%;object-fit:contain;display:block}
+
+  /* right-hand results column → dark cards (matches the hero) */
+  .cell{background:#14130F;border-color:#14130F}
+  .cell .t{color:#9C9689}
+  .cell .m{color:#F7F5F1}
+  .cell .d{color:#9C9689}
+  .cell .d b{color:#F7F5F1}
+  .check{background:#14130F;border-color:#14130F;color:#E8E4DC}
+  .check.ok{background:#17251C;border-color:rgba(91,178,120,.45)}
+  .check.no{background:#26140F;border-color:rgba(199,69,42,.5);color:#F0C9BD}
+  .check.idle{color:#9C9689}
+  .check b{color:#F7F5F1}
+  .totcard{background:#14130F;border-color:#14130F}
+  .totline + .totline{border-top-color:rgba(247,245,241,.1)}
+  .totline.grand{border-top-color:rgba(247,245,241,.22)}
+  .totline .lbl{color:#9C9689}
+  .totline .lbl b{color:#F7F5F1}
+  .totline .amt{color:#F7F5F1}
+  .totline.grand .amt{color:var(--accent)}
+  .taxrow{border-top-color:rgba(247,245,241,.1)}
+  .taxlbl{color:#9C9689}
+  .chip{border-color:rgba(247,245,241,.24);color:#C9C3B8}
+  .chip:hover{color:#F7F5F1;border-color:#F7F5F1}
+  .chip.active{background:#F7F5F1;border-color:#F7F5F1;color:#14130F}
+  .taxcustom{border-color:rgba(247,245,241,.24)}
+  .taxcustom input{color:#F7F5F1}
+  .taxcustom .cur{color:#9C9689}
+  .taxcustom:focus-within{border-color:rgba(247,245,241,.5);box-shadow:0 0 0 3px rgba(247,245,241,.08)}
 </style>
 </head>
 <body>
 <div class="wrap">
   <header class="top">
     <div class="brand">
-      <div class="dmark">d</div>
+      <div class="dmark"><img src="/assets/brand/logo-da-mark-inverse.png" alt="Design Asylum"></div>
       <div>
         <small>Design Asylum</small>
         <h1>Fuel Calculator</h1>
