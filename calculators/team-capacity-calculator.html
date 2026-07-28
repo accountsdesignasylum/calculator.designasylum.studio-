@@ -1,0 +1,466 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Team capacity calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EF;
+    --card:#FFFDFA;
+    --ink:#14130F;
+    --muted:#6E6A61;
+    --line:#E2DED6;
+    --clay:#C7452A;
+    --clay-soft:#F6E4DE;
+    --stone:#B8B2A6;
+    --slate:#7B766C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 20px 80px;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+
+  header{margin-bottom:36px;max-width:560px}
+  h1{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-weight:400;
+    font-size:42px;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  header p{color:var(--muted);margin-top:10px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:780px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+
+  .field{margin-bottom:26px}
+  .field:last-child{margin-bottom:0}
+  label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    letter-spacing:.01em;
+    margin-bottom:9px;
+  }
+  .hint{font-size:12.5px;color:var(--muted);margin-top:7px;min-height:1em}
+
+  .input-row{position:relative;display:flex;align-items:center}
+  .suffix{
+    position:absolute;right:14px;
+    top:50%;transform:translateY(-50%);
+    line-height:1;
+    color:var(--muted);font-size:15px;pointer-events:none;
+  }
+  input[type=text],select{
+    width:100%;
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+    color:var(--ink);
+    transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  select{appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236E6A61' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;padding-right:32px;cursor:pointer}
+  input.with-suffix{padding-right:48px}
+  input:focus,select:focus{
+    outline:none;
+    border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(20,19,15,.06);
+  }
+
+  .row{display:flex;gap:8px;margin-bottom:8px;align-items:center}
+  .row .name{flex:1.4;min-width:0}
+  .row .hrs{
+    flex:0 0 96px;min-width:0;
+    position:relative;display:flex;align-items:center;
+  }
+  .row .hrs .suffix{right:10px;font-size:12.5px}
+  .row .who{flex:1;min-width:0;display:flex;align-items:center}
+  .row input,.row select{padding:9px 12px;font-size:14px}
+  .row .hrs input{padding-right:36px}
+  .row select{padding-right:30px;background-position:right 10px center;text-overflow:ellipsis}
+  .rm{
+    flex:0 0 28px;height:28px;
+    border:1px solid var(--line);border-radius:99px;background:transparent;
+    color:var(--muted);cursor:pointer;font-size:15px;line-height:1;
+    transition:all .12s ease;
+  }
+  .rm:hover{border-color:var(--clay);color:var(--clay)}
+
+  .add{
+    font:inherit;font-size:12.5px;
+    padding:6px 13px;
+    border:1px solid var(--line);
+    background:transparent;
+    border-radius:99px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .12s ease;
+    margin-top:4px;
+  }
+  .add:hover{border-color:var(--ink);color:var(--ink)}
+
+  .sep{border-top:1px solid var(--line);margin:24px 0}
+
+  /* results */
+  .result{background:var(--ink);color:#F7F5F1;border-color:var(--ink)}
+  .result .eyebrow{
+    font-size:12px;text-transform:uppercase;letter-spacing:.09em;
+    color:#9C9689;margin-bottom:12px;
+  }
+  .headline{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:52px;line-height:1;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+  }
+  .headline small{font-size:22px;color:#9C9689}
+  .headline.over{color:#EFA48F}
+  @media(max-width:780px){ .headline{font-size:42px} }
+  .round-note{color:#9C9689;font-size:13.5px;margin-top:12px}
+  .round-note b{color:#F7F5F1;font-weight:500}
+
+  .bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:28px 0 20px;background:#2A2823}
+  .bar span{display:block;height:100%;transition:width .25s ease}
+  .seg-used{background:var(--stone)}
+  .seg-free{background:var(--clay)}
+
+  .person{margin-bottom:16px}
+  .person:last-child{margin-bottom:0}
+  .p-top{display:flex;justify-content:space-between;font-size:14px;margin-bottom:7px;font-variant-numeric:tabular-nums}
+  .p-top .nm{color:#F7F5F1}
+  .p-top .ld{color:#B5AFA3}
+  .p-top .ld b{color:#F7F5F1;font-weight:500}
+  .p-top .ld.hot b{color:#EFA48F}
+  .p-bar{height:6px;border-radius:99px;background:#2A2823;overflow:hidden}
+  .p-bar span{display:block;height:100%;background:var(--stone);transition:width .25s ease}
+  .p-bar span.hot{background:var(--clay)}
+
+  .bottleneck{color:#9C9689;font-size:13.5px;margin-top:20px;padding-top:16px;border-top:1px solid #2A2823}
+  .bottleneck b{color:#F7F5F1;font-weight:500}
+
+  .warn{
+    background:var(--clay-soft);
+    border:1px solid #E9C4B8;
+    color:#7E2B18;
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14px;
+  }
+  .warn b{font-weight:600}
+  .ok{
+    background:#EAF0E4;
+    border:1px solid #CBDCBB;
+    color:#3D5426;
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14px;
+  }
+  .ok b{font-weight:600}
+
+  footer{
+    margin-top:28px;color:var(--muted);font-size:13px;line-height:1.65;
+    max-width:640px;
+  }
+  footer b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Can your team take one more project?</h1>
+    <p>Treat every person's week as a budget of hours, and find out before you say yes.</p>
+  </header>
+
+  <div class="grid">
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="field">
+        <label>Your team</label>
+        <div id="peopleList"></div>
+        <button class="add" id="addPerson">+ Add a person</button>
+        <div class="hint">Real working hours, not 40. Take out calls, admin and breaks. Most people have 28 to 32.</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="field">
+        <label>Projects running right now</label>
+        <div id="projectList"></div>
+        <button class="add" id="addProject">+ Add a project</button>
+        <div class="hint">Hours the project needs per week, and who carries it.</div>
+      </div>
+
+      <div class="sep"></div>
+
+      <div class="field">
+        <label for="newHours">Thinking of saying yes to something new?</label>
+        <div class="input-row">
+          <input type="text" id="newHours" class="with-suffix" inputmode="decimal" value="" placeholder="0" autocomplete="off">
+          <span class="suffix">hrs/wk</span>
+        </div>
+        <div class="hint">Leave it blank to just see where the team stands today.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div>
+      <div id="resultCard" class="card result">
+        <div class="eyebrow" id="eyebrow">This week the team has</div>
+        <div class="headline" id="headline">23 <small>hours free</small></div>
+        <div class="round-note" id="roundNote"><b>76%</b> of the team's week is already spoken for.</div>
+
+        <div class="bar">
+          <span class="seg-used" id="segUsed" style="width:76%"></span>
+          <span class="seg-free" id="segFree" style="width:24%"></span>
+        </div>
+
+        <div id="peopleBars"></div>
+
+        <div class="bottleneck" id="bottleneck"></div>
+      </div>
+
+      <div id="verdictCard" class="card ok" style="display:none;margin-top:20px"></div>
+      <div id="warnCard" class="card warn" style="display:none;margin-top:20px"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    <b>How the math works.</b> Each person's week is a fixed budget of hours, and every project spends from it. Add up what the team has, subtract what the projects take, and what is left is the only room you have for new work. A project marked "whole team" splits its hours evenly across everyone.<br><br>
+    <b>Why this beats gut feel.</b> Saying yes usually happens because the team feels free this week. The budget view shows the hours already promised, so you find out you are out of room while you can still say no, instead of two weeks after you said yes.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var $ = function(id){ return document.getElementById(id); };
+
+  var people = [
+    { name:'You', hours:30 },
+    { name:'Designer', hours:32 },
+    { name:'Developer', hours:35 }
+  ];
+  var projects = [
+    { name:'Client A', hours:25, who:0 },
+    { name:'Client B', hours:30, who:'team' },
+    { name:'Internal work', hours:19, who:'team' }
+  ];
+
+  function parseNum(v){
+    var n = parseFloat(String(v).replace(/[^0-9.]/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+  function show(el, on){ el.style.display = on ? '' : 'none'; }
+  function esc(s){
+    return String(s).replace(/[&<>"']/g, function(c){
+      return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c];
+    });
+  }
+
+  /* ---------- render inputs ---------- */
+
+  function renderPeople(){
+    var html = '';
+    people.forEach(function(p, i){
+      html += '<div class="row">' +
+        '<div class="name"><input type="text" data-p="'+i+'" data-f="name" value="'+esc(p.name)+'" placeholder="Name" autocomplete="off"></div>' +
+        '<div class="hrs"><input type="text" data-p="'+i+'" data-f="hours" inputmode="decimal" value="'+p.hours+'" autocomplete="off"><span class="suffix">hrs</span></div>' +
+        '<button class="rm" data-rmp="'+i+'" title="Remove">&times;</button>' +
+        '</div>';
+    });
+    $('peopleList').innerHTML = html;
+  }
+
+  function renderProjects(){
+    var html = '';
+    projects.forEach(function(pr, i){
+      var opts = '';
+      people.forEach(function(p, j){
+        opts += '<option value="'+j+'"'+(pr.who === j ? ' selected' : '')+'>'+esc(p.name || 'Person '+(j+1))+'</option>';
+      });
+      opts += '<option value="team"'+(pr.who === 'team' ? ' selected' : '')+'>Whole team</option>';
+      html += '<div class="row">' +
+        '<div class="name"><input type="text" data-pr="'+i+'" data-f="name" value="'+esc(pr.name)+'" placeholder="Project" autocomplete="off"></div>' +
+        '<div class="hrs"><input type="text" data-pr="'+i+'" data-f="hours" inputmode="decimal" value="'+pr.hours+'" autocomplete="off"><span class="suffix">hrs</span></div>' +
+        '<div class="who"><select data-pr="'+i+'" data-f="who">'+opts+'</select></div>' +
+        '<button class="rm" data-rmpr="'+i+'" title="Remove">&times;</button>' +
+        '</div>';
+    });
+    $('projectList').innerHTML = html;
+  }
+
+  /* ---------- calculate ---------- */
+
+  function calc(){
+    var warn = $('warnCard'), res = $('resultCard'), verdict = $('verdictCard');
+
+    var validPeople = people.filter(function(p){ return p.hours > 0; });
+    if (validPeople.length === 0){
+      warn.innerHTML = '<b>Add at least one person with some hours.</b> Capacity starts with the team.';
+      show(warn, true); show(res, false); show(verdict, false); return;
+    }
+
+    // load per person
+    var load = people.map(function(){ return 0; });
+    projects.forEach(function(pr){
+      var h = pr.hours;
+      if (h <= 0) return;
+      if (pr.who === 'team'){
+        var per = h / people.length;
+        load = load.map(function(l){ return l + per; });
+      } else {
+        var idx = parseInt(pr.who, 10);
+        if (idx >= 0 && idx < load.length) load[idx] += h;
+      }
+    });
+
+    var cap = 0, used = 0;
+    people.forEach(function(p, i){ cap += p.hours; used += load[i]; });
+    var free = cap - used;
+    var usedPct = cap > 0 ? used / cap * 100 : 0;
+
+    show(res, true); show(warn, false);
+
+    var h = $('headline');
+    if (free >= 0){
+      h.className = 'headline';
+      h.innerHTML = Math.round(free) + ' <small>hours free</small>';
+      $('eyebrow').textContent = 'This week the team has';
+      $('roundNote').innerHTML = '<b>' + Math.round(usedPct) + '%</b> of the team’s week is already spoken for.';
+    } else {
+      h.className = 'headline over';
+      h.innerHTML = Math.round(-free) + ' <small>hours over</small>';
+      $('eyebrow').textContent = 'The team is already booked past full';
+      $('roundNote').innerHTML = 'You have promised <b>' + Math.round(used) + '</b> hours against a budget of <b>' + Math.round(cap) + '</b>. Something is slipping.';
+    }
+
+    $('segUsed').style.width = Math.min(usedPct, 100).toFixed(1) + '%';
+    $('segFree').style.width = Math.max(100 - usedPct, 0).toFixed(1) + '%';
+
+    // per person bars
+    var bars = '';
+    var worstIdx = -1, worstPct = -1;
+    people.forEach(function(p, i){
+      var pct = p.hours > 0 ? load[i] / p.hours * 100 : (load[i] > 0 ? 999 : 0);
+      if (pct > worstPct){ worstPct = pct; worstIdx = i; }
+      var hot = pct > 100;
+      bars += '<div class="person">' +
+        '<div class="p-top"><span class="nm">' + esc(p.name || 'Person ' + (i+1)) + '</span>' +
+        '<span class="ld' + (hot ? ' hot' : '') + '"><b>' + Math.round(load[i]) + '</b> / ' + Math.round(p.hours) + ' hrs</span></div>' +
+        '<div class="p-bar"><span class="' + (hot ? 'hot' : '') + '" style="width:' + Math.min(pct,100).toFixed(1) + '%"></span></div>' +
+        '</div>';
+    });
+    $('peopleBars').innerHTML = bars;
+
+    var bn = $('bottleneck');
+    if (worstIdx >= 0 && worstPct > 0){
+      var nm = esc(people[worstIdx].name || 'Person ' + (worstIdx+1));
+      bn.innerHTML = 'Tightest week: <b>' + nm + '</b> at <b>' + Math.round(worstPct) + '%</b> of their hours.' +
+        (worstPct > 100 ? ' They are the reason things slip first.' : '');
+      show(bn, true);
+    } else {
+      show(bn, false);
+    }
+
+    // new project verdict
+    var NH = parseNum($('newHours').value);
+    if (NH > 0){
+      if (free >= NH){
+        verdict.className = 'card ok';
+        verdict.innerHTML = '<b>It fits.</b> The new project needs ' + Math.round(NH) + ' hours a week and the team has ' +
+          Math.round(free) + ' free, so you can say yes with ' + Math.round(free - NH) + ' hours to spare.';
+      } else {
+        verdict.className = 'card warn';
+        verdict.innerHTML = '<b>It does not fit.</b> The new project needs ' + Math.round(NH) + ' hours a week and the team has ' +
+          (free > 0 ? Math.round(free) + ' free' : 'none free') + '. Saying yes means you are short by ' +
+          Math.round(NH - Math.max(free,0)) + ' hours, and that shortfall comes out of a current project or someone’s evenings.';
+      }
+      verdict.style.marginTop = '20px';
+      show(verdict, true);
+    } else {
+      show(verdict, false);
+    }
+  }
+
+  /* ---------- events ---------- */
+
+  $('peopleList').addEventListener('input', function(e){
+    var t = e.target, i = parseInt(t.dataset.p, 10);
+    if (isNaN(i)) return;
+    if (t.dataset.f === 'name'){ people[i].name = t.value; renderProjects(); }
+    else { people[i].hours = parseNum(t.value); }
+    calc();
+  });
+
+  $('peopleList').addEventListener('click', function(e){
+    var i = e.target.dataset.rmp;
+    if (i === undefined) return;
+    i = parseInt(i, 10);
+    people.splice(i, 1);
+    // remap project assignments
+    projects.forEach(function(pr){
+      if (pr.who === 'team') return;
+      var idx = parseInt(pr.who, 10);
+      if (idx === i) pr.who = 'team';
+      else if (idx > i) pr.who = idx - 1;
+    });
+    renderPeople(); renderProjects(); calc();
+  });
+
+  $('projectList').addEventListener('input', function(e){
+    var t = e.target, i = parseInt(t.dataset.pr, 10);
+    if (isNaN(i)) return;
+    if (t.dataset.f === 'name') projects[i].name = t.value;
+    else if (t.dataset.f === 'hours') projects[i].hours = parseNum(t.value);
+    calc();
+  });
+
+  $('projectList').addEventListener('change', function(e){
+    var t = e.target, i = parseInt(t.dataset.pr, 10);
+    if (isNaN(i) || t.dataset.f !== 'who') return;
+    projects[i].who = (t.value === 'team') ? 'team' : parseInt(t.value, 10);
+    calc();
+  });
+
+  $('addPerson').addEventListener('click', function(){
+    people.push({ name:'', hours:30 });
+    renderPeople(); renderProjects(); calc();
+  });
+
+  $('addProject').addEventListener('click', function(){
+    projects.push({ name:'', hours:10, who:'team' });
+    renderProjects(); calc();
+  });
+
+  $('newHours').addEventListener('input', calc);
+
+  renderPeople();
+  renderProjects();
+  calc();
+})();
+</script>
+</body>
+</html>

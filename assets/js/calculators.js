@@ -32,5 +32,21 @@ window.CALCULATORS = [
       "Work backwards from what you want to keep to find the retainer you should charge.",
     thumbnail: "/assets/thumbnails/retainer-calculator.svg",
     cta: "Open calculator"
+  },
+  {
+    slug: "floor-price-calculator",
+    title: "Floor Price Calculator",
+    description:
+      "Find the lowest price you can quote per project before you're paying to work.",
+    thumbnail: "/assets/thumbnails/floor-price-calculator.svg",
+    cta: "Open calculator"
+  },
+  {
+    slug: "team-capacity-calculator",
+    title: "Team Capacity Calculator",
+    description:
+      "Treat each person's week as a budget of hours and see if the team can take on one more project.",
+    thumbnail: "/assets/thumbnails/team-capacity-calculator.svg",
+    cta: "Open calculator"
   }
 ];
