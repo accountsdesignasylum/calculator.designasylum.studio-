@@ -38,6 +38,11 @@
   .resetbtn{background:transparent;border:1px solid var(--border);color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:9px;cursor:pointer;min-height:var(--tap);transition:all .12s ease}
   .resetbtn:hover{color:var(--ink);border-color:var(--ink)}
   .resetbtn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+  .header-actions{display:flex;align-items:center;gap:10px}
+  .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  #currency{font:inherit;font-size:13px;font-weight:500;color:var(--muted);background:transparent;border:1px solid var(--border);border-radius:9px;padding:9px 32px 9px 13px;min-height:var(--tap);cursor:pointer;appearance:none;-webkit-appearance:none;background-repeat:no-repeat;background-position:right 12px center;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236E6A61' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");transition:all .12s ease}
+  #currency:hover{color:var(--ink);border-color:var(--ink)}
+  #currency:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 
   .grid{display:grid;grid-template-columns:1.02fr .98fr;gap:20px;align-items:start}
   @media(max-width:920px){.grid{grid-template-columns:1fr}}
@@ -209,7 +214,16 @@
         <p class="tagline">Set a customer target and a timeline. See the media and influencer fuel it takes to get there.</p>
       </div>
     </div>
-    <button class="resetbtn" id="reset" type="button">Reset</button>
+    <div class="header-actions">
+      <label class="visually-hidden" for="currency">Currency</label>
+      <select id="currency" aria-label="Currency">
+        <option value="INR">Rupees (INR)</option>
+        <option value="USD">USD</option>
+        <option value="AED">AED</option>
+        <option value="EUR">Euro (EUR)</option>
+      </select>
+      <button class="resetbtn" id="reset" type="button">Reset</button>
+    </div>
   </header>
 
   <div class="grid">
@@ -261,7 +275,7 @@
         </div>
         <div class="field">
           <div class="lab"><span class="name">Average order value</span><span class="sub-note">per purchase</span></div>
-          <div class="num"><span class="cur">₹</span><input type="number" id="aov" value="700" min="1" step="50" aria-label="Average order value"></div>
+          <div class="num"><span class="cur js-cur">₹</span><input type="number" id="aov" value="700" min="1" step="50" aria-label="Average order value"></div>
         </div>
         <div class="two" style="margin-top:20px">
           <div class="field" style="margin-top:0">
@@ -290,14 +304,14 @@
         </div>
         <div class="field" style="margin-top:0">
           <div class="lab"><span class="name">Budget you can spend per month</span><span class="sub-note">on ads</span></div>
-          <div class="num"><span class="cur">₹</span><input type="number" id="cap" value="0" min="0" step="10000" aria-label="Monthly ad budget"></div>
+          <div class="num"><span class="cur js-cur">₹</span><input type="number" id="cap" value="0" min="0" step="10000" aria-label="Monthly ad budget"></div>
           <div class="imp">We'll check if that hits the target in time. Leave at 0 to skip.</div>
         </div>
         <div class="divide"></div>
         <label class="toggle"><input type="checkbox" id="agToggle"> Include our monthly retainer in the total</label>
         <div class="field" id="agWrap" style="margin-top:12px;display:none">
           <div class="lab"><span class="name">Agency retainer</span><span class="sub-note">per month</span></div>
-          <div class="num"><span class="cur">₹</span><input type="number" id="agency" value="225000" min="0" step="25000" aria-label="Agency retainer per month"></div>
+          <div class="num"><span class="cur js-cur">₹</span><input type="number" id="agency" value="225000" min="0" step="25000" aria-label="Agency retainer per month"></div>
         </div>
       </section>
 
@@ -389,11 +403,32 @@ const PRESETS = {
 const DEFAULT_TARGET = {conv:5000, time:5};
 
 const $ = id => document.getElementById(id);
-const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+// ---- currency (symbol swap only, no conversion) ----
+const CURRENCIES = {
+  INR:{symbol:'₹',locale:'en-IN'}, USD:{symbol:'$',locale:'en-US'},
+  AED:{symbol:'AED ',locale:'en-US'}, EUR:{symbol:'€',locale:'en-US'}
+};
+const CUR_KEY = 'da_currency';
+let currentCurrency = 'INR';
+function readCurrency(){ try{ const v = localStorage.getItem(CUR_KEY); if(v && CURRENCIES[v]) return v; }catch(e){} return 'INR'; }
+function saveCurrency(v){ try{ localStorage.setItem(CUR_KEY, v); }catch(e){} }
+function curSym(){ return CURRENCIES[currentCurrency].symbol; }
+function curLoc(){ return CURRENCIES[currentCurrency].locale; }
+function applyCurrencySymbols(){ document.querySelectorAll('.js-cur').forEach(el => { el.textContent = curSym(); }); }
+
+const inr = n => curSym() + Math.round(n).toLocaleString(curLoc());
 function compact(n){
   if(!isFinite(n)) return '—';
-  if(n >= 1e7) return '₹' + (n/1e7).toFixed(2).replace(/\.00$/,'') + ' Cr';
-  if(n >= 1e5) return '₹' + (n/1e5).toFixed(2).replace(/\.00$/,'') + ' L';
+  const s = curSym();
+  if(currentCurrency === 'INR'){
+    if(n >= 1e7) return s + (n/1e7).toFixed(2).replace(/\.00$/,'') + ' Cr';
+    if(n >= 1e5) return s + (n/1e5).toFixed(2).replace(/\.00$/,'') + ' L';
+  } else {
+    if(n >= 1e9) return s + (n/1e9).toFixed(2).replace(/\.00$/,'') + 'B';
+    if(n >= 1e6) return s + (n/1e6).toFixed(2).replace(/\.00$/,'') + 'M';
+    if(n >= 1e3) return s + (n/1e3).toFixed(2).replace(/\.00$/,'') + 'K';
+  }
   return inr(n);
 }
 
@@ -491,12 +526,12 @@ function compute(){
     ck.innerHTML = '<span class="badge">Check</span> Set Meta ROAS above 0 to test this.';
   } else if(cap >= monthlyAds){
     ck.className = 'check ok';
-    ck.innerHTML = '<span class="badge">On track</span> ₹'+Math.round(cap).toLocaleString('en-IN')+'/mo covers the <b>'+compact(monthlyAds)+'/mo</b> of ads needed. You have headroom.';
+    ck.innerHTML = '<span class="badge">On track</span> '+inr(cap)+'/mo covers the <b>'+compact(monthlyAds)+'/mo</b> of ads needed. You have headroom.';
   } else {
     const custAtCap = Math.round((cap * T * Rm)/AOV);
     const monthsNeeded = Math.ceil(spendAds / cap);
     ck.className = 'check no';
-    ck.innerHTML = '<span class="badge">Short</span> At ₹'+Math.round(cap).toLocaleString('en-IN')+'/mo, ads reach about <b>'+custAtCap.toLocaleString('en-IN')+'</b> customers in '+T+' months. To get '+Math.round(Cads).toLocaleString('en-IN')+' from ads, raise to <b>'+compact(monthlyAds)+'/mo</b> or extend to <b>'+monthsNeeded+' months</b>.';
+    ck.innerHTML = '<span class="badge">Short</span> At '+inr(cap)+'/mo, ads reach about <b>'+custAtCap.toLocaleString('en-IN')+'</b> customers in '+T+' months. To get '+Math.round(Cads).toLocaleString('en-IN')+' from ads, raise to <b>'+compact(monthlyAds)+'/mo</b> or extend to <b>'+monthsNeeded+' months</b>.';
   }
 
   // totals + tax
@@ -544,6 +579,13 @@ document.querySelectorAll('#taxChips .chip').forEach(c => c.addEventListener('cl
 }));
 $('taxCustom').addEventListener('input', compute);
 
+$('currency').addEventListener('change', () => {
+  currentCurrency = $('currency').value;
+  saveCurrency(currentCurrency);
+  applyCurrencySymbols();
+  compute();
+});
+
 $('reset').addEventListener('click', () => {
   document.querySelector('input[name=ind][value=skincare]').checked = true;
   els.conv.value = DEFAULT_TARGET.conv; els.convNum.value = DEFAULT_TARGET.conv;
@@ -556,6 +598,9 @@ $('reset').addEventListener('click', () => {
   applyPreset('skincare');
 });
 
+currentCurrency = readCurrency();
+$('currency').value = currentCurrency;
+applyCurrencySymbols();
 applyPreset('skincare');
 </script>
 </body>
