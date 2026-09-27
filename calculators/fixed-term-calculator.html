@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Fixed-term project calculator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#F5F3EF;
+    --card:#FFFDFA;
+    --ink:#14130F;
+    --muted:#6E6A61;
+    --line:#E2DED6;
+    --clay:#C7452A;
+    --clay-soft:#F6E4DE;
+    --stone:#B8B2A6;
+    --sand:#DCD5C7;
+    --slate:#7B766C;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',system-ui,-apple-system,sans-serif;
+    font-size:15px;
+    line-height:1.5;
+    -webkit-font-smoothing:antialiased;
+    padding:40px 20px 80px;
+  }
+  .wrap{max-width:940px;margin:0 auto}
+
+  header{display:flex;align-items:flex-start;justify-content:space-between;gap:20px;margin-bottom:36px;flex-wrap:wrap}
+  .header-text{max-width:520px}
+  h1{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-weight:400;
+    font-size:42px;
+    letter-spacing:-0.01em;
+    line-height:1.1;
+  }
+  header p{color:var(--muted);margin-top:10px}
+  .resetbtn{background:transparent;border:1px solid var(--line);color:var(--muted);font:inherit;font-size:13px;font-weight:500;padding:9px 15px;border-radius:9px;cursor:pointer;min-height:44px;flex:0 0 auto;transition:all .12s ease}
+  .resetbtn:hover{color:var(--ink);border-color:var(--ink)}
+  .resetbtn:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+  .header-actions{display:flex;align-items:center;gap:10px;flex:0 0 auto}
+  .visually-hidden{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0 0 0 0);white-space:nowrap;border:0}
+  #currency{font:inherit;font-size:13px;font-weight:500;color:var(--muted);background:transparent;border:1px solid var(--line);border-radius:9px;padding:9px 32px 9px 13px;min-height:44px;cursor:pointer;appearance:none;-webkit-appearance:none;background-repeat:no-repeat;background-position:right 12px center;background-image:url("data:image/svg+xml;charset=utf-8,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%236E6A61' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");transition:all .12s ease}
+  #currency:hover{color:var(--ink);border-color:var(--ink)}
+  #currency:focus{outline:none;border-color:var(--ink);box-shadow:0 0 0 3px rgba(20,19,15,.06)}
+  #currency:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:20px;align-items:start}
+  @media(max-width:780px){ .grid{grid-template-columns:1fr} h1{font-size:34px} }
+
+  .card{
+    background:var(--card);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:28px;
+  }
+
+  .field{margin-bottom:26px}
+  .field:last-child{margin-bottom:0}
+  label,.label{
+    display:block;
+    font-size:13px;
+    font-weight:500;
+    letter-spacing:.01em;
+    margin-bottom:9px;
+  }
+  .hint{font-size:12.5px;color:var(--muted);margin-top:7px;min-height:1em}
+
+  .input-row{position:relative;display:flex;align-items:center}
+  .prefix,.suffix{
+    position:absolute;color:var(--muted);font-size:15px;pointer-events:none;
+  }
+  .prefix{left:14px}
+  .suffix{right:14px}
+  input[type=text]{
+    width:100%;
+    font:inherit;
+    font-variant-numeric:tabular-nums;
+    background:transparent;
+    border:1px solid var(--line);
+    border-radius:9px;
+    padding:12px 14px;
+    color:var(--ink);
+    transition:border-color .12s ease, box-shadow .12s ease;
+  }
+  input.with-prefix{padding-left:30px}
+  input.with-suffix{padding-right:34px}
+  input:focus{
+    outline:none;
+    border-color:var(--ink);
+    box-shadow:0 0 0 3px rgba(20,19,15,.06);
+  }
+
+  .chips{display:flex;gap:6px;margin-top:9px;flex-wrap:wrap}
+  .chip{
+    font:inherit;font-size:12.5px;
+    padding:5px 11px;
+    border:1px solid var(--line);
+    background:transparent;
+    border-radius:99px;
+    cursor:pointer;
+    color:var(--muted);
+    transition:all .12s ease;
+  }
+  .chip:hover{border-color:var(--ink);color:var(--ink)}
+  .chip.on{background:var(--ink);border-color:var(--ink);color:var(--card)}
+
+  .toggle{
+    display:inline-flex;
+    background:var(--paper);
+    border:1px solid var(--line);
+    border-radius:8px;
+    padding:3px;
+    margin-bottom:11px;
+  }
+  .toggle button{
+    font:inherit;font-size:13px;
+    padding:6px 14px;
+    border:0;background:transparent;border-radius:6px;
+    cursor:pointer;color:var(--muted);
+    transition:all .12s ease;
+  }
+  .toggle button.on{background:var(--card);color:var(--ink);font-weight:500;box-shadow:0 1px 2px rgba(0,0,0,.05)}
+
+  /* slider */
+  .slider-head{display:flex;align-items:baseline;justify-content:space-between;margin-bottom:12px}
+  .slider-val{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:26px;line-height:1;
+    font-variant-numeric:tabular-nums;
+  }
+  .slider-val span{font-family:'Inter',sans-serif;font-size:13px;color:var(--muted);margin-left:3px}
+  input[type=range]{
+    -webkit-appearance:none;appearance:none;
+    width:100%;height:20px;
+    background:transparent;
+    cursor:pointer;
+    display:block;
+  }
+  input[type=range]::-webkit-slider-runnable-track{
+    height:4px;border-radius:99px;background:var(--line);
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none;appearance:none;
+    width:18px;height:18px;border-radius:99px;
+    background:var(--ink);border:3px solid var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+    margin-top:-7px;
+    transition:transform .12s ease;
+  }
+  input[type=range]:active::-webkit-slider-thumb{transform:scale(1.12)}
+  input[type=range]::-moz-range-track{height:4px;border-radius:99px;background:var(--line)}
+  input[type=range]::-moz-range-thumb{
+    width:14px;height:14px;border-radius:99px;
+    background:var(--ink);border:3px solid var(--card);
+    box-shadow:0 1px 3px rgba(0,0,0,.18);
+  }
+  input[type=range]:focus{outline:none}
+  input[type=range]:focus-visible::-webkit-slider-thumb{box-shadow:0 0 0 3px rgba(20,19,15,.14)}
+  .ticks{display:flex;justify-content:space-between;color:var(--muted);font-size:11.5px;margin-top:2px}
+
+  /* other expenses list */
+  .exp-list{display:flex;flex-direction:column;gap:8px}
+  .exp-row{display:grid;grid-template-columns:1fr 1fr 36px;gap:8px;align-items:center}
+  .exp-row input{padding-top:10px;padding-bottom:10px}
+  .exp-del{
+    width:36px;height:36px;
+    border:1px solid transparent;background:transparent;border-radius:8px;
+    color:var(--muted);cursor:pointer;font-size:18px;line-height:1;
+    transition:all .12s ease;
+  }
+  .exp-del:hover{border-color:var(--line);color:var(--ink)}
+  .exp-del:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+  .exp-foot{display:flex;align-items:center;justify-content:space-between;margin-top:10px;gap:10px}
+  .addbtn{
+    font:inherit;font-size:12.5px;font-weight:500;
+    padding:6px 12px;
+    border:1px dashed var(--stone);background:transparent;border-radius:99px;
+    color:var(--muted);cursor:pointer;transition:all .12s ease;
+  }
+  .addbtn:hover{border-color:var(--ink);color:var(--ink)}
+  .addbtn:focus-visible{outline:2px solid var(--clay);outline-offset:2px}
+  .exp-total{font-size:12.5px;color:var(--muted);font-variant-numeric:tabular-nums}
+  .exp-total b{color:var(--ink);font-weight:500}
+
+  /* results */
+  .result{background:var(--ink);color:#F7F5F1;border-color:var(--ink)}
+  .result .eyebrow{
+    font-size:12px;text-transform:uppercase;letter-spacing:.09em;
+    color:#9C9689;margin-bottom:12px;
+  }
+  .headline{
+    font-family:'Instrument Serif',Georgia,serif;
+    font-size:52px;line-height:1;letter-spacing:-.01em;
+    font-variant-numeric:tabular-nums;
+  }
+  @media(max-width:780px){ .headline{font-size:42px} }
+  .round-note{color:#9C9689;font-size:13.5px;margin-top:12px}
+  .round-note b{color:#F7F5F1;font-weight:500}
+
+  .bar{display:flex;height:8px;border-radius:99px;overflow:hidden;margin:28px 0 20px;background:#2A2823}
+  .bar span{display:block;height:100%;transition:width .25s ease}
+  .seg-sal{background:var(--stone)}
+  .seg-oth{background:var(--sand)}
+  .seg-tax{background:var(--slate)}
+  .seg-keep{background:var(--clay)}
+
+  table{width:100%;border-collapse:collapse;font-variant-numeric:tabular-nums}
+  td{padding:11px 0;border-bottom:1px solid #2A2823;font-size:14.5px}
+  tr:last-child td{border-bottom:0}
+  td.val{text-align:right;font-weight:500}
+  td.key{color:#B5AFA3}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:99px;margin-right:9px;vertical-align:middle}
+  .pct{color:#8B8578;font-size:12.5px;margin-left:8px;font-weight:400}
+  tr.keep td{color:#F7F5F1;font-size:15.5px;padding-top:14px}
+  tr.keep td.val{color:#EFA48F}
+
+  .permonth{
+    margin-top:20px;padding-top:16px;border-top:1px solid #2A2823;
+    display:flex;justify-content:space-between;gap:12px;
+    font-size:13.5px;color:#9C9689;font-variant-numeric:tabular-nums;
+  }
+  .permonth b{color:#F7F5F1;font-weight:500}
+
+  .warn{
+    background:var(--clay-soft);
+    border:1px solid #E9C4B8;
+    color:#7E2B18;
+    border-radius:10px;
+    padding:16px 18px;
+    font-size:14px;
+  }
+  .warn b{font-weight:600}
+
+  footer{
+    margin-top:28px;color:var(--muted);font-size:13px;line-height:1.65;
+    max-width:640px;
+  }
+  footer b{color:var(--ink);font-weight:500}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <div class="header-text">
+      <h1>What should I quote for this project?</h1>
+      <p>Add up the months, the salaries and the one-off costs. Decide what you want left over. Get one number for the whole job.</p>
+    </div>
+    <div class="header-actions">
+      <label class="visually-hidden" for="currency">Currency</label>
+      <select id="currency" aria-label="Currency">
+        <option value="INR">Rupees (INR)</option>
+        <option value="USD">USD</option>
+        <option value="AED">AED</option>
+        <option value="EUR">Euro (EUR)</option>
+      </select>
+      <button class="resetbtn" id="reset" type="button">Reset</button>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- INPUTS -->
+    <div class="card">
+      <div class="field">
+        <label for="months">How long is the project?</label>
+        <div class="slider-head">
+          <span class="slider-val" id="monthsVal">4<span>months</span></span>
+        </div>
+        <input type="range" id="months" min="1" max="10" step="1" value="4">
+        <div class="ticks"><span>1 month</span><span>5</span><span>10 months</span></div>
+      </div>
+
+      <div class="field">
+        <label for="salary">Monthly salary expense</label>
+        <div class="input-row">
+          <span class="prefix">₹</span>
+          <input type="text" id="salary" class="with-prefix money" inputmode="numeric" value="1,32,000" autocomplete="off">
+        </div>
+        <div class="hint" id="salaryHint">Everyone on the project, every month it runs.</div>
+      </div>
+
+      <div class="field">
+        <span class="label" id="otherLabel">Other expenses for the whole project</span>
+        <div class="exp-list" id="expList" aria-labelledby="otherLabel"></div>
+        <div class="exp-foot">
+          <button class="addbtn" id="addExp" type="button">+ Add expense</button>
+          <span class="exp-total" id="expTotal">Total <b>₹0</b></span>
+        </div>
+        <div class="hint">One-off or occasional costs: travel, shoots, software licences, printing, venue hire.</div>
+      </div>
+
+      <div class="field">
+        <label for="tax">Tax rate</label>
+        <div class="input-row">
+          <input type="text" id="tax" class="with-suffix" inputmode="decimal" value="30" autocomplete="off">
+          <span class="suffix">%</span>
+        </div>
+        <div class="chips" id="taxChips">
+          <button class="chip" data-tax="0" type="button">None</button>
+          <button class="chip" data-tax="5" type="button">5%</button>
+          <button class="chip" data-tax="20" type="button">20%</button>
+          <button class="chip on" data-tax="30" type="button">30%</button>
+          <button class="chip" data-tax="22" type="button">22% corporate</button>
+        </div>
+      </div>
+
+      <div class="field">
+        <span class="label">What you want to save</span>
+        <div class="toggle" id="modeToggle">
+          <button data-mode="pct" class="on" type="button">As a % of the quote</button>
+          <button data-mode="amt" type="button">As a fixed amount</button>
+        </div>
+
+        <div class="input-row" id="pctWrap">
+          <input type="text" id="targetPct" class="with-suffix" inputmode="decimal" value="25" autocomplete="off" aria-label="Savings as a percentage of the quote">
+          <span class="suffix">%</span>
+        </div>
+
+        <div class="input-row" id="amtWrap" style="display:none">
+          <span class="prefix">₹</span>
+          <input type="text" id="targetAmt" class="with-prefix money" inputmode="numeric" value="2,00,000" autocomplete="off" aria-label="Savings as a fixed amount for the whole project">
+        </div>
+
+        <div class="hint" id="targetHint">Cash left after tax, as a share of the full quote.</div>
+      </div>
+    </div>
+
+    <!-- RESULTS -->
+    <div id="resultCard" class="card result">
+      <div class="eyebrow" id="eyebrow">Quote for 4 months</div>
+      <div class="headline" id="headline">₹0</div>
+      <div class="round-note" id="roundNote"></div>
+
+      <div class="bar">
+        <span class="seg-sal" id="segSal"></span>
+        <span class="seg-oth" id="segOth"></span>
+        <span class="seg-tax" id="segTax"></span>
+        <span class="seg-keep" id="segKeep"></span>
+      </div>
+
+      <table>
+        <tr>
+          <td class="key"><span class="dot" style="background:#F7F5F1;opacity:.35"></span>Client pays</td>
+          <td class="val" id="rRev"></td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-sal"></span><span id="kSal">Salaries</span><span class="pct" id="pSal"></span></td>
+          <td class="val" id="rSal"></td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-oth"></span>Other expenses<span class="pct" id="pOth"></span></td>
+          <td class="val" id="rOth"></td>
+        </tr>
+        <tr>
+          <td class="key"><span class="dot seg-tax"></span>Tax<span class="pct" id="pTax"></span></td>
+          <td class="val" id="rTax"></td>
+        </tr>
+        <tr class="keep">
+          <td class="key"><span class="dot seg-keep"></span>You save<span class="pct" id="pKeep"></span></td>
+          <td class="val" id="rKeep"></td>
+        </tr>
+      </table>
+
+      <div class="permonth">
+        <span>Works out to</span>
+        <span><b id="perMonth"></b> a month</span>
+      </div>
+    </div>
+
+    <div id="warnCard" class="card warn" style="display:none"></div>
+
+  </div>
+
+  <footer>
+    <b>How the math works.</b> Total cost is your monthly salaries times the number of months, plus the other expenses. Profit is the quote minus that cost, and you save what is left of the profit after tax. To save a share of the quote, your tax rate and your savings share have to add up to less than 100%, otherwise no quote works.<br><br>
+    <b>One caveat.</b> This applies a flat rate to profit. Real Indian tax depends on structure: a proprietorship pays slab rates, a company pays corporate tax, and presumptive taxation under 44ADA changes the taxable base entirely. GST is not included, so add it on top of the quote. Use this to set a floor, not to file returns.
+  </footer>
+
+</div>
+
+<script>
+(function(){
+  var mode = 'pct';
+  var $ = function(id){ return document.getElementById(id); };
+
+  var DEFAULT_EXPENSES = [
+    { name: 'Travel', amount: 30000 },
+    { name: 'Operational', amount: 20000 }
+  ];
+
+  // ---- currency (symbol swap only, no conversion) ----
+  var CURRENCIES = {
+    INR:{symbol:'₹',locale:'en-IN'}, USD:{symbol:'$',locale:'en-US'},
+    AED:{symbol:'AED ',locale:'en-US'}, EUR:{symbol:'€',locale:'en-US'}
+  };
+  var CUR_KEY = 'da_currency';
+  var currentCurrency = 'INR';
+  function readCurrency(){ try{ var v = localStorage.getItem(CUR_KEY); if(v && CURRENCIES[v]) return v; }catch(e){} return 'INR'; }
+  function saveCurrency(v){ try{ localStorage.setItem(CUR_KEY, v); }catch(e){} }
+  function curSym(){ return CURRENCIES[currentCurrency].symbol; }
+  function curLoc(){ return CURRENCIES[currentCurrency].locale; }
+  function moneyInputs(){ return document.querySelectorAll('input.money'); }
+  function applyCurrencySymbols(){
+    Array.prototype.forEach.call(document.querySelectorAll('.prefix'), function(el){ el.textContent = curSym(); });
+    var pad = (currentCurrency === 'AED') ? '54px' : '30px';
+    Array.prototype.forEach.call(moneyInputs(), function(el){ el.style.paddingLeft = pad; });
+  }
+  function reformatMoneyFields(){
+    Array.prototype.forEach.call(moneyInputs(), function(el){ var n = parseNum(el.value); el.value = n ? fmtIn(n) : ''; });
+  }
+
+  function parseNum(v){
+    var n = parseFloat(String(v).replace(/[^0-9.]/g,''));
+    return isNaN(n) ? 0 : n;
+  }
+  function money(n){
+    return curSym() + Math.round(n).toLocaleString(curLoc());
+  }
+  function fmtIn(n){
+    return Math.round(n).toLocaleString(curLoc());
+  }
+  function show(el, on){ el.style.display = on ? '' : 'none'; }
+  function monthsWord(n){ return n === 1 ? 'month' : 'months'; }
+
+  // money inputs: recalc live, plain digits while editing, pretty-print on blur
+  function wireMoney(el){
+    el.addEventListener('input', calc);
+    el.addEventListener('blur', function(){
+      var n = parseNum(el.value);
+      el.value = n ? fmtIn(n) : '';
+      calc();
+    });
+    el.addEventListener('focus', function(){
+      el.value = String(parseNum(el.value) || '');
+    });
+  }
+
+  // ---- other expenses list ----
+  var expCount = 0;
+  function addExpense(name, amount, focus){
+    expCount++;
+    var row = document.createElement('div');
+    row.className = 'exp-row';
+
+    var nameIn = document.createElement('input');
+    nameIn.type = 'text';
+    nameIn.className = 'exp-name';
+    nameIn.placeholder = 'What is it for?';
+    nameIn.value = name || '';
+    nameIn.autocomplete = 'off';
+    nameIn.setAttribute('aria-label', 'Expense ' + expCount + ' name');
+
+    var wrap = document.createElement('div');
+    wrap.className = 'input-row';
+    var pre = document.createElement('span');
+    pre.className = 'prefix';
+    pre.textContent = curSym();
+    var amtIn = document.createElement('input');
+    amtIn.type = 'text';
+    amtIn.className = 'with-prefix money exp-amt';
+    amtIn.inputMode = 'numeric';
+    amtIn.autocomplete = 'off';
+    amtIn.placeholder = '0';
+    amtIn.value = amount ? fmtIn(amount) : '';
+    amtIn.setAttribute('aria-label', 'Expense ' + expCount + ' amount');
+    amtIn.style.paddingLeft = (currentCurrency === 'AED') ? '54px' : '30px';
+    wrap.appendChild(pre);
+    wrap.appendChild(amtIn);
+
+    var del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'exp-del';
+    del.innerHTML = '&times;';
+    del.setAttribute('aria-label', 'Remove this expense');
+    del.addEventListener('click', function(){
+      row.parentNode.removeChild(row);
+      calc();
+    });
+
+    row.appendChild(nameIn);
+    row.appendChild(wrap);
+    row.appendChild(del);
+    $('expList').appendChild(row);
+    wireMoney(amtIn);
+    if (focus) nameIn.focus();
+  }
+  function otherTotal(){
+    var sum = 0;
+    Array.prototype.forEach.call(document.querySelectorAll('.exp-amt'), function(el){ sum += parseNum(el.value); });
+    return sum;
+  }
+  function loadDefaultExpenses(){
+    $('expList').innerHTML = '';
+    expCount = 0;
+    DEFAULT_EXPENSES.forEach(function(e){ addExpense(e.name, e.amount, false); });
+  }
+
+  function calc(){
+    var n = parseInt($('months').value, 10) || 1;
+    var S = parseNum($('salary').value);
+    var O = otherTotal();
+    var salTotal = S * n;
+    var C = salTotal + O;
+    var t = parseNum($('tax').value) / 100;
+    var warn = $('warnCard'), res = $('resultCard');
+
+    $('monthsVal').innerHTML = n + '<span>' + monthsWord(n) + '</span>';
+    $('expTotal').innerHTML = 'Total <b>' + money(O) + '</b>';
+    $('salaryHint').textContent = S > 0
+      ? 'That is ' + money(salTotal) + ' across ' + n + ' ' + monthsWord(n) + '.'
+      : 'Everyone on the project, every month it runs.';
+    $('targetHint').textContent = (mode === 'pct')
+      ? 'Cash left after tax, as a share of the full quote.'
+      : 'Cash left after tax, across all ' + n + ' ' + monthsWord(n) + ' of the project.';
+
+    if (t < 0 || t >= 1){
+      warn.innerHTML = '<b>That tax rate does not work.</b> Enter something between 0 and 99.';
+      show(warn, true); show(res, false); return;
+    }
+
+    var Q;
+    if (mode === 'pct'){
+      var p = parseNum($('targetPct').value) / 100;
+      var denom = 1 - t - p;
+      if (p <= 0){
+        warn.innerHTML = '<b>Set a savings target above zero.</b>';
+        show(warn, true); show(res, false); return;
+      }
+      if (denom <= 0){
+        var max = ((1 - t) * 100).toFixed(0);
+        warn.innerHTML = '<b>No quote gets you there.</b> After tax at ' + (t*100).toFixed(0) +
+          '%, you save at most ' + max + '% of the quote, and that only happens if the project costs nothing. ' +
+          'Pick a target under ' + max + '%, or bring the costs down.';
+        show(warn, true); show(res, false); return;
+      }
+      if (C <= 0){
+        warn.innerHTML = '<b>Add your salaries or expenses first.</b> With zero cost, any quote hits your percentage.';
+        show(warn, true); show(res, false); return;
+      }
+      Q = C * (1 - t) / denom;
+    } else {
+      var A = parseNum($('targetAmt').value);
+      if (A <= 0){
+        warn.innerHTML = '<b>Set a savings amount above zero.</b>';
+        show(warn, true); show(res, false); return;
+      }
+      Q = C + A / (1 - t);
+    }
+
+    show(warn, false); show(res, true);
+
+    var profit = Q - C;
+    var tax = profit * t;
+    var keep = profit - tax;
+
+    var ps = salTotal / Q * 100, po = O / Q * 100, pt = tax / Q * 100, pk = keep / Q * 100;
+    var rounded = Math.ceil(Q / 5000) * 5000;
+    var quoted = (rounded > Q + 1) ? rounded : Q;
+
+    $('eyebrow').textContent = 'Quote for ' + n + ' ' + monthsWord(n);
+    $('headline').textContent = money(Q);
+    $('roundNote').innerHTML = (rounded > Q + 1)
+      ? 'Round up and quote <b>' + money(rounded) + '</b> for the whole project.'
+      : 'That is already a clean number. Quote <b>' + money(Q) + '</b> for the whole project.';
+
+    $('segSal').style.width  = ps.toFixed(2) + '%';
+    $('segOth').style.width  = po.toFixed(2) + '%';
+    $('segTax').style.width  = pt.toFixed(2) + '%';
+    $('segKeep').style.width = pk.toFixed(2) + '%';
+
+    $('kSal').textContent = 'Salaries (' + n + ' × ' + money(S) + ')';
+    $('rRev').textContent  = money(Q);
+    $('rSal').textContent  = money(salTotal);
+    $('rOth').textContent  = money(O);
+    $('rTax').textContent  = money(tax);
+    $('rKeep').textContent = money(keep);
+
+    $('pSal').textContent  = ps.toFixed(1) + '%';
+    $('pOth').textContent  = po.toFixed(1) + '%';
+    $('pTax').textContent  = pt.toFixed(1) + '%';
+    $('pKeep').textContent = pk.toFixed(1) + '%';
+
+    $('perMonth').textContent = money(quoted / n);
+  }
+
+  // slider
+  $('months').addEventListener('input', calc);
+
+  // add expense
+  $('addExp').addEventListener('click', function(){ addExpense('', 0, true); calc(); });
+
+  // mode toggle
+  Array.prototype.forEach.call($('modeToggle').children, function(btn){
+    btn.addEventListener('click', function(){
+      Array.prototype.forEach.call($('modeToggle').children, function(b){ b.classList.remove('on'); });
+      btn.classList.add('on');
+      mode = btn.dataset.mode;
+      show($('pctWrap'), mode === 'pct');
+      show($('amtWrap'), mode === 'amt');
+      calc();
+    });
+  });
+
+  // tax chips
+  Array.prototype.forEach.call($('taxChips').children, function(chip){
+    chip.addEventListener('click', function(){
+      $('tax').value = chip.dataset.tax;
+      syncChips();
+      calc();
+    });
+  });
+  function syncChips(){
+    var v = $('tax').value.trim();
+    Array.prototype.forEach.call($('taxChips').children, function(c){
+      c.classList.toggle('on', c.dataset.tax === v);
+    });
+  }
+
+  wireMoney($('salary'));
+  wireMoney($('targetAmt'));
+  $('tax').addEventListener('input', function(){ syncChips(); calc(); });
+  $('targetPct').addEventListener('input', calc);
+
+  $('currency').addEventListener('change', function(){
+    currentCurrency = $('currency').value;
+    saveCurrency(currentCurrency);
+    applyCurrencySymbols();
+    reformatMoneyFields();
+    calc();
+  });
+
+  function resetAll(){
+    $('months').value = '4';
+    $('salary').value = '132000';
+    $('tax').value = '30';
+    $('targetPct').value = '25';
+    $('targetAmt').value = '200000';
+    loadDefaultExpenses();
+    Array.prototype.forEach.call($('modeToggle').children, function(b){ b.classList.remove('on'); });
+    $('modeToggle').querySelector('[data-mode="pct"]').classList.add('on');
+    mode = 'pct';
+    show($('pctWrap'), true); show($('amtWrap'), false);
+    syncChips();
+    applyCurrencySymbols();
+    reformatMoneyFields();
+    calc();
+  }
+  $('reset').addEventListener('click', resetAll);
+
+  currentCurrency = readCurrency();
+  $('currency').value = currentCurrency;
+  resetAll();
+})();
+</script>
+</body>
+</html>
