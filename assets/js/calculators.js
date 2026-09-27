@@ -34,6 +34,14 @@ window.CALCULATORS = [
     cta: "Open calculator"
   },
   {
+    slug: "fixed-term-calculator",
+    title: "Fixed-Term Project Calculator",
+    description:
+      "Pick how many months the project runs, add salaries and one-off costs, and get one quote for the whole job.",
+    thumbnail: "/assets/thumbnails/fixed-term-calculator.svg",
+    cta: "Open calculator"
+  },
+  {
     slug: "floor-price-calculator",
     title: "Floor Price Calculator",
     description:

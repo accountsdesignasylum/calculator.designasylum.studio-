@@ -23,9 +23,11 @@ repo into Hostinger's `public_html`.
 │   └── brand/                       logos (wordmark + mark, light/dark) + favicon.svg
 ├── calculators/                    ORIGINAL calculator HTML — do not edit
 │   ├── fuel-calculator.html
-│   └── retainer-calculator.html
+│   ├── retainer-calculator.html
+│   └── fixed-term-calculator.html
 ├── fuel-calculator/index.html      wrapper page → iframes the file above
 ├── retainer-calculator/index.html
+├── fixed-term-calculator/index.html
 ├── robots.txt · sitemap.xml · .htaccess · 404.html
 ```
 
